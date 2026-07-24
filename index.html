@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GearMatch - Outdoor Kit Finder</title>
+  <!-- Tailwind CSS per la grafica via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+  <!-- HEADER -->
+  <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🌲</span>
+        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+          GearMatch
+        </h1>
+        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-0.5 rounded-full font-medium">MVP</span>
+      </div>
+      <p class="text-xs text-slate-400 hidden sm:block">Configuratore Equipaggiamento Outdoor</p>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    
+    <!-- STEP 1: SCENARI -->
+    <section>
+      <h2 class="text-lg font-semibold text-slate-200 mb-1">1. Seleziona il tuo Scenario</h2>
+      <p class="text-sm text-slate-400 mb-4">Scegli il tipo di avventura per caricare la combinazione ottimale.</p>
+      
+      <div id="scenarios-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Generato via JavaScript -->
+      </div>
+    </section>
+
+    <!-- STEP 2: SUMMARY BANNER -->
+    <section id="summary-banner" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 backdrop-blur">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span id="active-scenario-tag" class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 rounded-md">
+            Scenario Selezionato
+          </span>
+          <h3 id="active-scenario-title" class="text-2xl font-bold mt-2 text-white">Caricamento...</h3>
+          <p id="active-scenario-desc" class="text-sm text-slate-400 mt-1"></p>
+        </div>
+
+        <!-- STATS BADGES -->
+        <div class="flex flex-wrap gap-4 w-full md:w-auto">
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 flex-1 md:flex-none min-w-[120px]">
+            <span class="text-xs text-slate-400 block mb-1">Peso Base</span>
+            <span id="stat-weight" class="text-2xl font-extrabold text-emerald-400">0.0 kg</span>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 flex-1 md:flex-none min-w-[120px]">
+            <span class="text-xs text-slate-400 block mb-1">Prezzo Totale</span>
+            <span id="stat-price" class="text-2xl font-extrabold text-teal-300">0 €</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: PRODOTTI DEL KIT -->
+    <section>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-slate-200">2. Il Tuo Kit Consigliato (5 Elementi)</h2>
+        <span class="text-xs text-slate-400">Prodotti coordinati per peso/prestazioni</span>
+      </div>
+
+      <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Generato via JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- LOGICA JAVASCRIPT -->
+  <script>
+    // --- DATABASE LOCALE (Dati presi dalla tua tabella) ---
+    const DATA = {
+      scenarios: [
+        {
+          id: "SCEN-001",
+          name: "Primo Bivacco Estivo",
+          desc: "Per chi inizia e vuole dormire a quote medie (giugno-agosto) contenendo la spesa.",
+          profile: "Budget",
+          tempMin: 8,
+          rValueMin: 1.5,
+          targetWeight: 6.5,
+          targetBudget: 400
+        },
+        {
+          id: "SCEN-002",
+          name: "Trekking 3 Giorni Ultralight",
+          desc: "Per escursionisti esperti su percorsi appenninici/alpini con dislivelli importanti.",
+          profile: "Ultralight",
+          tempMin: 0,
+          rValueMin: 3.5,
+          targetWeight: 4.2,
+          targetBudget: 1000
+        },
+        {
+          id: "SCEN-003",
+          name: "Bikepack Gravel Weekend",
+          desc: "Attrezzatura ad alta compressibilità pensata per lo spazio ridotto delle borse da bici.",
+          profile: "Bilanciato",
+          tempMin: 5,
+          rValueMin: 2.5,
+          targetWeight: 5.0,
+          targetBudget: 750
+        }
+      ],
+      products: [
+        // Tende
+        { id: "PROD-001", name: "Cloud Up 2 Upgrade", brand: "Naturehike", category: "Tenda", price: 130, weight: 1400, profile: "Budget", url: "https://amazon.it" },
+        { id: "PROD-002", name: "MT900 2 Posti", brand: "Forclaz", category: "Tenda", price: 220, weight: 1950, profile: "Bilanciato", url: "https://decathlon.it" },
+        { id: "PROD-003", name: "Copper Spur HV UL2", brand: "Big Agnes", category: "Tenda", price: 490, weight: 1200, profile: "Ultralight", url: "https://bergfreunde.it" },
+        
+        // Sacchi
+        { id: "PROD-005", name: "MT500 Synth 8°C", brand: "Forclaz", category: "Sacco a Pelo", price: 55, weight: 980, tempComfort: 8, profile: "Budget", url: "https://decathlon.it" },
+        { id: "PROD-006", name: "Lite Line 300 (Piuma)", brand: "Cumulus", category: "Sacco a Pelo", price: 270, weight: 600, tempComfort: 4, profile: "Ultralight", url: "https://cumulus.equipment" },
+        { id: "PROD-007", name: "Spark SpII (Piuma)", brand: "Sea to Summit", category: "Sacco a Pelo", price: 380, weight: 490, tempComfort: -2, profile: "Ultralight", url: "https://bergfreunde.it" },
+        
+        // Materassini
+        { id: "PROD-008", name: "Trek 100 Schiuma", brand: "Forclaz", category: "Materassino", price: 18, weight: 370, rValue: 1.5, profile: "Budget", url: "https://decathlon.it" },
+        { id: "PROD-009", name: "Insulated Static V", brand: "Klymit", category: "Materassino", price: 85, weight: 700, rValue: 4.4, profile: "Bilanciato", url: "https://amazon.it" },
+        { id: "PROD-010", name: "NeoAir XLite NXT", brand: "Therm-a-Rest", category: "Materassino", price: 220, weight: 370, rValue: 4.5, profile: "Ultralight", url: "https://bergfreunde.it" },
+        
+        // Zaini
+        { id: "PROD-011", name: "MT500 Air 50L", brand: "Forclaz", category: "Zaino", price: 110, weight: 1700, profile: "Budget", url: "https://decathlon.it" },
+        { id: "PROD-012", name: "Exos 48", brand: "Osprey", category: "Zaino", price: 210, weight: 1250, profile: "Bilanciato", url: "https://bergfreunde.it" },
+        { id: "PROD-013", name: "Crown3 60", brand: "Granite Gear", category: "Zaino", price: 240, weight: 1080, profile: "Ultralight", url: "https://bergfreunde.it" },
+        
+        // Fornelletti
+        { id: "PROD-014", name: "PocketRocket 2", brand: "MSR", category: "Fornelletto", price: 45, weight: 73, profile: "Bilanciato", url: "https://amazon.it" },
+        { id: "PROD-015", name: "BRS-3000T Titanium", brand: "BRS", category: "Fornelletto", price: 19, weight: 25, profile: "Budget", url: "https://amazon.it" }
+      ]
+    };
+
+    let activeScenarioId = "SCEN-001";
+
+    // --- RENDER SCENARI ---
+    function renderScenarios() {
+      const container = document.getElementById("scenarios-grid");
+      container.innerHTML = DATA.scenarios.map(scen => {
+        const isActive = scen.id === activeScenarioId;
+        return `
+          <div onclick="selectScenario('${scen.id}')" 
+               class="cursor-pointer transition-all duration-200 border rounded-xl p-5 ${
+                 isActive 
+                   ? 'bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20' 
+                   : 'bg-slate-800/40 border-slate-700/80 hover:border-slate-500'
+               }">
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded ${
+                scen.profile === 'Ultralight' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                scen.profile === 'Bilanciato' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+              }">${scen.profile}</span>
+              <span class="text-xs text-slate-400">Target: < ${scen.targetWeight} kg</span>
+            </div>
+            <h3 class="font-bold text-slate-100 text-base mb-1">${scen.name}</h3>
+            <p class="text-xs text-slate-400 line-clamp-2">${scen.desc}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- SELEZIONA SCENARIO E CALCOLA KIT ---
+    function selectScenario(id) {
+      activeScenarioId = id;
+      renderScenarios();
+      updateKit();
+    }
+
+    function updateKit() {
+      const scenario = DATA.scenarios.find(s => s.id === activeScenarioId);
+      
+      // Filtra 1 prodotto per categoria coerente con il profilo
+      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
+      const kitProducts = categories.map(cat => {
+        const matches = DATA.products.filter(p => p.category === cat);
+        // Cerca prima per tag profilo, altrimenti prende il primo disponibile
+        return matches.find(p => p.profile === scenario.profile) || matches[0];
+      }).filter(Boolean);
+
+      // Aggiorna Banner Statistiche
+      document.getElementById("active-scenario-title").innerText = scenario.name;
+      document.getElementById("active-scenario-desc").innerText = scenario.desc;
+      document.getElementById("active-scenario-tag").innerText = `Profilo: ${scenario.profile}`;
+
+      const totalWeightGrams = kitProducts.reduce((acc, p) => acc + p.weight, 0);
+      const totalPriceEUR = kitProducts.reduce((acc, p) => acc + p.price, 0);
+
+      document.getElementById("stat-weight").innerText = `${(totalWeightGrams / 1000).toFixed(2)} kg`;
+      document.getElementById("stat-price").innerText = `${totalPriceEUR} €`;
+
+      // Render Prodotti Kit
+      const container = document.getElementById("products-list");
+      container.innerHTML = kitProducts.map(p => `
+        <div class="bg-slate-800/50 border border-slate-700/70 rounded-xl p-5 flex flex-col justify-between hover:border-slate-600 transition-all">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">${p.category}</span>
+              <span class="text-xs text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">${p.brand}</span>
+            </div>
+            <h4 class="font-bold text-slate-100 text-base mb-2">${p.name}</h4>
+            
+            <div class="space-y-1 text-xs text-slate-300 mb-4">
+              <p>⚖️ Peso: <strong class="text-white">${p.weight} g</strong></p>
+              ${p.tempComfort !== undefined ? `<p>🌡️ Temp Comfort: <strong class="text-white">${p.tempComfort}°C</strong></p>` : ''}
+              ${p.rValue !== undefined ? `<p>🛡️ R-Value: <strong class="text-white">${p.rValue}</strong></p>` : ''}
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-700/50 flex justify-between items-center mt-auto">
+            <span class="text-lg font-extrabold text-white">${p.price} €</span>
+            <a href="${p.url}" target="_blank" rel="noopener noreferrer" 
+               class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex items-center gap-1">
+              Vedi Store ↗
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- INIZIALIZZAZIONE ---
+    renderScenarios();
+    updateKit();
+  </script>
+</body>
+</html>
