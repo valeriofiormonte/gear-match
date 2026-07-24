@@ -3,266 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GearMatch — AI Outdoor Kit Finder</title>
-  <!-- Tailwind CSS via CDN -->
+  <title>GearMatch — Smart Outdoor Kit Finder</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
+  <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
 
-  <!-- HEADER NAVBAR -->
+  <!-- HEADER -->
   <header class="border-b border-slate-200/80 bg-white/80 sticky top-0 z-50 backdrop-blur-md">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-base shadow-sm">
-          🌲
-        </div>
+        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">🌲</div>
         <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch</span>
-        <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full">
-          Beta
-        </span>
       </div>
-      <span id="data-source-indicator" class="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-        Database: Inizializzazione...
+      <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
+        Inizializzazione Database...
       </span>
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
+  <!-- MAIN -->
   <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-12 flex flex-col items-center">
     
-    <!-- HERO & PROMPT CENTERED SECTION -->
+    <!-- PROMPT HERO SECTION -->
     <section class="w-full text-center space-y-6 my-auto max-w-2xl">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-        <span>✨ Powered by Smart Trekking Matching</span>
-      </div>
-      
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> generato in un click.
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Descrivi la tua prossima escursione. L'algoritmo selezionerà i 5 elementi essenziali bilanciando peso, budget e temperature.
+        Database esterno sincronizzato. Descrivi il tuo viaggio e l'algoritmo abbinerà i prodotti migliori.
       </p>
 
-      <!-- BARRA PROMPT CENTRALE -->
       <div class="pt-2">
-        <div class="bg-white p-2 rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row gap-2 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
+        <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row gap-2 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
           <div class="flex-1 flex items-center gap-3 px-3">
             <span class="text-slate-400 text-lg">🔍</span>
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Trekking di 3 giorni sulle Alpi ad alta quota con dislivello..." 
+              placeholder="Es: Voglio fare campeggio con la famiglia in comodità..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
+              disabled
             />
           </div>
           <button 
+            id="btn-generate"
             onclick="processPrompt()" 
-            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]">
-            ⚡ Genera Kit
+            class="bg-slate-300 text-slate-500 font-semibold text-sm px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+            disabled>
+            ⏳ Caricamento...
           </button>
         </div>
 
-        <!-- SUGGERIMENTI PROMPT (CHIPS) -->
         <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs">
-          <span class="text-slate-400 self-center font-medium mr-1">Suggerimenti:</span>
-          <button onclick="setPrompt('Primo bivacco estivo economico per principianti')" class="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition-colors shadow-2xs">
-            🏕️ Primo bivacco economico
-          </button>
-          <button onclick="setPrompt('Trekking 3 giorni ultralight ad alta quota')" class="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition-colors shadow-2xs">
-            🪶 Ultralight Alta Quota
-          </button>
-          <button onclick="setPrompt('Trekking autunnale freddo e isolamento termico')" class="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition-colors shadow-2xs">
-            ❄️ Autunno / Freddo
-          </button>
-          <button onclick="setPrompt('Trekking veloci weekend medio dislivello')" class="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full transition-colors shadow-2xs">
-            ⚡ Fast & Light Weekend
-          </button>
+          <button onclick="setPrompt('Un trekking ultraleggero per macinare dislivello sulle Alpi')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🪶 Ultralight Alta Quota</button>
+          <button onclick="setPrompt('Spedizione in Perù con freddo intenso')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">❄️ Spedizione Andina</button>
+          <button onclick="setPrompt('Weekend in bikepacking gravel con poco spazio')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🚲 Bikepacking Gravel</button>
         </div>
       </div>
     </section>
 
-    <!-- RESULTS SECTION (COMPARE DOPO IL PROMPT) -->
+    <!-- RISULTATI -->
     <section id="results-section" class="w-full space-y-6 mt-12 hidden transition-all duration-500">
+      <div class="border-t border-slate-200 pt-8"></div>
       
-      <div class="border-t border-slate-200 pt-8">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 text-center">Risultato della Configurazione</h2>
-      </div>
-
-      <!-- PROFILO DETECTED & STATS BANNER -->
+      <!-- BANNER STATS -->
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span id="active-scenario-tag" class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">
-              Profilo: Budget
-            </span>
-            <span id="active-scenario-id" class="text-xs text-slate-400 font-mono">SCEN-001</span>
-          </div>
-          <h3 id="active-scenario-title" class="text-xl font-bold text-slate-900">Primo Bivacco Estivo</h3>
-          <p id="active-scenario-desc" class="text-sm text-slate-600 max-w-xl"></p>
+          <span id="scenario-tag" class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">Profilo</span>
+          <h3 id="scenario-title" class="text-xl font-bold text-slate-900">Titolo Scenario</h3>
+          <p id="scenario-desc" class="text-sm text-slate-600"></p>
         </div>
-
-        <!-- METRICHE KIT -->
         <div class="flex gap-3 w-full md:w-auto">
-          <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 flex-1 md:flex-none min-w-[120px] text-center">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px]">
             <span class="text-[11px] font-medium text-slate-500 block">Peso Base</span>
             <span id="stat-weight" class="text-xl font-extrabold text-slate-900">0.0 kg</span>
           </div>
-          <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 flex-1 md:flex-none min-w-[120px] text-center">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px]">
             <span class="text-[11px] font-medium text-slate-500 block">Costo Stimato</span>
             <span id="stat-price" class="text-xl font-extrabold text-emerald-600">0 €</span>
           </div>
         </div>
       </div>
 
-      <!-- LISTA 5 PRODOTTI -->
+      <!-- PRODOTTI -->
       <div>
-        <h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-          📦 Equipaggiamento Consigliato <span class="text-xs font-normal text-slate-500">(5 Moduli)</span>
-        </h3>
-
-        <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Generato via JavaScript -->
-        </div>
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">📦 Equipaggiamento Consigliato</h3>
+        <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
-
     </section>
 
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-    <div class="max-w-5xl mx-auto px-4">
-      GearMatch MVP — Configurazione guidata per escursionisti e trekker.
-    </div>
-  </footer>
-
-  <!-- LOGICA JAVASCRIPT -->
   <script>
     // =========================================================================
-    // 1. CONFIGURAZIONE FOGLI GOOGLE
-    // Inserisci qui l'URL CSV del tuo foglio pubblicato sul web
+    // INSERISCI QUI I DUE LINK CSV (Scheda Scenari e Scheda Prodotti)
     // =========================================================================
-    const GOOGLE_SHEET_CSV_URL = "INSERISCI_QUI_IL_TUO_LINK_CSV";
+    const URL_CSV_SCENARI = "LINK_CSV_SCHEDA_SCENARI";
+    const URL_CSV_PRODOTTI = "LINK_CSV_SCHEDA_PRODOTTI";
 
-    // Database locale di fallback con molteplici Scenari da Trekking
-    let DATA = {
-      scenarios: [
-        {
-          id: "SCEN-001",
-          name: "Primo Bivacco Estivo",
-          desc: "Ideale per chi comincia e affronta trekking estivi senza spendere cifre elevate.",
-          profile: "Budget"
-        },
-        {
-          id: "SCEN-002",
-          name: "Trekking 3+ Giorni Ultralight",
-          desc: "Attrezzatura ad altissime prestazioni per macinare dislivelli e chilometri riducendo al minimo il carico.",
-          profile: "Ultralight"
-        },
-        {
-          id: "SCEN-003",
-          name: "Fast & Light Weekend",
-          desc: "Il giusto bilanciamento tra peso e comfort per uscite di 2 giorni su medie quote.",
-          profile: "Bilanciato"
-        },
-        {
-          id: "SCEN-004",
-          name: "Trekking Autunnale / Quota Fredda",
-          desc: "Focus su isolamento termico (R-Value elevato e sacchi a pelo per basse temperature).",
-          profile: "4-Stagioni"
-        }
-      ],
-      products: [
-        // TENDE
-        { id: "PROD-001", name: "Cloud Up 2 Upgrade", brand: "Naturehike", category: "Tenda", price: 130, weight: 1400, profile: "Budget", url: "https://amazon.it" },
-        { id: "PROD-002", name: "MT900 2 Posti", brand: "Forclaz", category: "Tenda", price: 220, weight: 1950, profile: "Bilanciato", url: "https://decathlon.it" },
-        { id: "PROD-003", name: "Copper Spur HV UL2", brand: "Big Agnes", category: "Tenda", price: 490, weight: 1200, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "PROD-004", name: "Hubba Hubba NX", brand: "MSR", category: "Tenda", price: 430, weight: 1720, profile: "4-Stagioni", url: "https://amazon.it" },
-
-        // SACCHI A PELO
-        { id: "PROD-005", name: "MT500 Synth 8°C", brand: "Forclaz", category: "Sacco a Pelo", price: 55, weight: 980, tempComfort: 8, profile: "Budget", url: "https://decathlon.it" },
-        { id: "PROD-006", name: "Lite Line 300 (Piuma)", brand: "Cumulus", category: "Sacco a Pelo", price: 270, weight: 600, tempComfort: 4, profile: "Ultralight", url: "https://cumulus.equipment" },
-        { id: "PROD-007", name: "Spark SpII (Piuma)", brand: "Sea to Summit", category: "Sacco a Pelo", price: 380, weight: 490, tempComfort: -2, profile: "Bilanciato", url: "https://bergfreunde.it" },
-        { id: "PROD-008", name: "Panyam 450 (-6°C)", brand: "Cumulus", category: "Sacco a Pelo", price: 360, weight: 830, tempComfort: -6, profile: "4-Stagioni", url: "https://cumulus.equipment" },
-
-        // MATERASSINI
-        { id: "PROD-009", name: "Trek 100 Schiuma", brand: "Forclaz", category: "Materassino", price: 18, weight: 370, rValue: 1.5, profile: "Budget", url: "https://decathlon.it" },
-        { id: "PROD-010", name: "Insulated Static V", brand: "Klymit", category: "Materassino", price: 85, weight: 700, rValue: 4.4, profile: "Bilanciato", url: "https://amazon.it" },
-        { id: "PROD-011", name: "NeoAir XLite NXT", brand: "Therm-a-Rest", category: "Materassino", price: 220, weight: 370, rValue: 4.5, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "PROD-012", name: "NeoAir XTherm NXT (R 7.3)", brand: "Therm-a-Rest", category: "Materassino", price: 260, weight: 430, rValue: 7.3, profile: "4-Stagioni", url: "https://bergfreunde.it" },
-
-        // ZAINI
-        { id: "PROD-013", name: "MT500 Air 50L", brand: "Forclaz", category: "Zaino", price: 110, weight: 1700, profile: "Budget", url: "https://decathlon.it" },
-        { id: "PROD-014", name: "Exos 48", brand: "Osprey", category: "Zaino", price: 210, weight: 1250, profile: "Bilanciato", url: "https://bergfreunde.it" },
-        { id: "PROD-015", name: "Crown3 60", brand: "Granite Gear", category: "Zaino", price: 240, weight: 1080, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "PROD-016", name: "Mutant 38", brand: "Osprey", category: "Zaino", price: 180, weight: 1200, profile: "4-Stagioni", url: "https://amazon.it" },
-
-        // FORNELLETTI
-        { id: "PROD-017", name: "BRS-3000T Titanium", brand: "BRS", category: "Fornelletto", price: 19, weight: 25, profile: "Budget", url: "https://amazon.it" },
-        { id: "PROD-018", name: "PocketRocket 2", brand: "MSR", category: "Fornelletto", price: 45, weight: 73, profile: "Bilanciato", url: "https://amazon.it" },
-        { id: "PROD-019", name: "WindMaster", brand: "SOTO", category: "Fornelletto", price: 80, weight: 87, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "PROD-020", name: "Reactor 1.0L System", brand: "MSR", category: "Fornelletto", price: 220, weight: 417, profile: "4-Stagioni", url: "https://amazon.it" }
-      ]
-    };
-
-    let activeProfile = "Budget";
+    let DB = { scenarios: [], products: [] };
 
     // =========================================================================
-    // 2. PARSING FOGLI GOOGLE (CSV)
+    // 1. FETCH DATI DA GOOGLE FOGLI
     // =========================================================================
-    async function loadProductsFromGoogleSheets() {
-      const indicator = document.getElementById("data-source-indicator");
-      
-      if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes("INSERISCI_QUI")) {
-        indicator.innerText = "Database: Locale MVP";
+    async function initDatabase() {
+      if (URL_CSV_SCENARI.includes("LINK_CSV")) {
+        updateStatus("Inserisci i link CSV nel codice per iniziare", "red");
         return;
       }
 
       try {
-        indicator.innerText = "Database: Connessione...";
-        const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        const csvText = await response.text();
-        
-        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
-        
-        if (lines.length > 1) {
-          const parsedProducts = lines.slice(1).map(line => {
-            const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-            if (values.length < 6) return null;
-            
-            return {
-              id: values[0],
-              name: values[1],
-              brand: values[2],
-              category: values[3],
-              price: parseFloat(values[4]) || 0,
-              weight: parseInt(values[5]) || 0,
-              tempComfort: values[6] && values[6] !== '-' ? parseFloat(values[6]) : undefined,
-              rValue: values[7] && values[7] !== '-' ? parseFloat(values[7]) : undefined,
-              profile: values[8],
-              url: values[9] || "https://amazon.it"
-            };
-          }).filter(Boolean);
+        // Scarica entrambi i file in parallelo
+        const [resScenari, resProdotti] = await Promise.all([
+          fetch(URL_CSV_SCENARI), fetch(URL_CSV_PRODOTTI)
+        ]);
 
-          if (parsedProducts.length > 0) {
-            DATA.products = parsedProducts;
-            indicator.innerText = "Database: Google Sheets (Live)";
-          }
-        }
+        const txtScenari = await resScenari.text();
+        const txtProdotti = await resProdotti.text();
+
+        // Parsing Scenari
+        DB.scenarios = txtScenari.split(/\r?\n/).slice(1).map(line => {
+          const v = line.split(',').map(s => s.trim());
+          return v.length > 3 ? { id: v[0], name: v[1], desc: v[2], profile: v[3], keywords: v[4] || "" } : null;
+        }).filter(Boolean);
+
+        // Parsing Prodotti
+        DB.products = txtProdotti.split(/\r?\n/).slice(1).map(line => {
+          const v = line.split(',').map(s => s.trim());
+          return v.length > 5 ? {
+            id: v[0], name: v[1], brand: v[2], category: v[3],
+            price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
+            tempComfort: v[6] && v[6]!=='-' ? v[6] : undefined,
+            rValue: v[7] && v[7]!=='-' ? v[7] : undefined,
+            profile: v[8], url: v[9] || "#"
+          } : null;
+        }).filter(Boolean);
+
+        updateStatus("Database Live (Connesso a GSheets)", "emerald");
+        
+        // Abilita la barra di ricerca
+        document.getElementById("user-prompt").disabled = false;
+        const btn = document.getElementById("btn-generate");
+        btn.disabled = false;
+        btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2";
+        btn.innerHTML = "⚡ Genera Kit";
+
       } catch (error) {
-        console.warn("Impossibile caricare Fogli Google, uso il database locale:", error);
-        indicator.innerText = "Database: Fallback Locale";
+        updateStatus("Errore connessione a Google Fogli", "red");
+        console.error(error);
       }
     }
 
+    function updateStatus(msg, color) {
+      const el = document.getElementById("data-status");
+      el.innerText = msg;
+      el.className = `text-xs font-medium px-3 py-1 rounded-full border border-${color}-200 bg-${color}-50 text-${color}-700`;
+    }
+
     // =========================================================================
-    // 3. LOGICA DI ESTRAZIONE PROFILO DAL PROMPT
+    // 2. MOTORE DI RICERCA CONVERSAZIONALE NLP
     // =========================================================================
     function setPrompt(text) {
       document.getElementById("user-prompt").value = text;
@@ -273,78 +174,55 @@
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
       if (!promptText.trim()) return;
 
-      // Logica keyword matching
-      if (
-        promptText.includes("economico") || 
-        promptText.includes("poco") || 
-        promptText.includes("primo") || 
-        promptText.includes("principiante") || 
-        promptText.includes("budget") ||
-        promptText.includes("spendere poco")
-      ) {
-        activeProfile = "Budget";
-      } 
-      else if (
-        promptText.includes("ultralight") || 
-        promptText.includes("leggero") || 
-        promptText.includes("dislivello") || 
-        promptText.includes("tecnico") || 
-        promptText.includes("3 giorni") || 
-        promptText.includes("alpi")
-      ) {
-        activeProfile = "Ultralight";
-      }
-      else if (
-        promptText.includes("freddo") || 
-        promptText.includes("inverno") || 
-        promptText.includes("autunno") || 
-        promptText.includes("neve") || 
-        promptText.includes("zero") || 
-        promptText.includes("isolamento")
-      ) {
-        activeProfile = "4-Stagioni";
-      }
-      else {
-        activeProfile = "Bilanciato";
-      }
+      let bestMatch = DB.scenarios[0];
+      let maxScore = 0;
 
-      // Mostra la sezione dei risultati
-      const resultsSec = document.getElementById("results-section");
-      resultsSec.classList.remove("hidden");
-      
-      updateKit();
+      // Confronta le parole scritte dall'utente con le keywords nel foglio Google
+      DB.scenarios.forEach(scen => {
+        let score = 0;
+        const keywords = scen.keywords.toLowerCase().split(',').map(k => k.trim());
+        
+        keywords.forEach(kw => {
+          if (kw && promptText.includes(kw)) score++;
+        });
 
-      // Smooth scroll verso i risultati
-      resultsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (score > maxScore) {
+          maxScore = score;
+          bestMatch = scen;
+        }
+      });
+
+      renderKit(bestMatch);
     }
 
     // =========================================================================
-    // 4. RENDERING KIT
+    // 3. RENDERIZZAZIONE A SCHERMO
     // =========================================================================
-    function updateKit() {
-      const scenario = DATA.scenarios.find(s => s.profile === activeProfile) || DATA.scenarios[0];
-      
+    function renderKit(scenario) {
+      document.getElementById("results-section").classList.remove("hidden");
+      document.getElementById("results-section").scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      document.getElementById("scenario-title").innerText = scenario.name;
+      document.getElementById("scenario-desc").innerText = scenario.desc;
+      document.getElementById("scenario-tag").innerText = `Profilo: ${scenario.profile}`;
+
       const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
-      const kitProducts = categories.map(cat => {
-        const matches = DATA.products.filter(p => p.category === cat);
-        return matches.find(p => p.profile === activeProfile) || matches[0];
+      
+      const kit = categories.map(cat => {
+        const matchingCat = DB.products.filter(p => p.category === cat);
+        // Cerca il prodotto col profilo esatto, altrimenti usa un fallback Bilanciato o il primo disponibile
+        return matchingCat.find(p => p.profile === scenario.profile) || 
+               matchingCat.find(p => p.profile === 'Bilanciato') || 
+               matchingCat[0];
       }).filter(Boolean);
 
-      // Aggiorna Banner
-      document.getElementById("active-scenario-title").innerText = scenario.name;
-      document.getElementById("active-scenario-desc").innerText = scenario.desc;
-      document.getElementById("active-scenario-tag").innerText = `Profilo: ${scenario.profile}`;
-      document.getElementById("active-scenario-id").innerText = scenario.id;
+      const totalWeight = kit.reduce((acc, p) => acc + p.weight, 0);
+      const totalPrice = kit.reduce((acc, p) => acc + p.price, 0);
 
-      const totalWeightGrams = kitProducts.reduce((acc, p) => acc + p.weight, 0);
-      const totalPriceEUR = kitProducts.reduce((acc, p) => acc + p.price, 0);
+      document.getElementById("stat-weight").innerText = `${(totalWeight / 1000).toFixed(2)} kg`;
+      document.getElementById("stat-price").innerText = `${totalPrice} €`;
 
-      document.getElementById("stat-weight").innerText = `${(totalWeightGrams / 1000).toFixed(2)} kg`;
-      document.getElementById("stat-price").innerText = `${totalPriceEUR} €`;
-
-      // Render Cards
-      const container = document.getElementById("products-list");
-      container.innerHTML = kitProducts.map(p => `
+      document.getElementById("products-list").innerHTML = kit.map(p => `
         <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all">
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -353,19 +231,16 @@
               </span>
               <span class="text-xs text-slate-500 font-medium">${p.brand}</span>
             </div>
-            <h4 class="font-bold text-slate-900 text-sm mb-3 line-clamp-1" title="${p.name}">${p.name}</h4>
-            
+            <h4 class="font-bold text-slate-900 text-sm mb-3">${p.name}</h4>
             <div class="space-y-1 text-xs text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
               <div class="flex justify-between"><span>Peso:</span> <strong class="text-slate-900">${p.weight} g</strong></div>
-              ${p.tempComfort !== undefined ? `<div class="flex justify-between"><span>Temp Comfort:</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
-              ${p.rValue !== undefined ? `<div class="flex justify-between"><span>Isolamento:</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
+              ${p.tempComfort ? `<div class="flex justify-between"><span>Temp Comfort:</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
+              ${p.rValue ? `<div class="flex justify-between"><span>Isolamento:</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
             </div>
           </div>
-
           <div class="pt-3 border-t border-slate-100 flex justify-between items-center mt-auto">
             <span class="text-base font-extrabold text-slate-900">${p.price} €</span>
-            <a href="${p.url}" target="_blank" rel="noopener noreferrer" 
-               class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+            <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
               Store ↗
             </a>
           </div>
@@ -373,15 +248,11 @@
       `).join('');
     }
 
-    // Enter Key Listener
-    document.getElementById("user-prompt")?.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        processPrompt();
-      }
+    document.getElementById("user-prompt").addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !e.target.disabled) processPrompt();
     });
 
-    // Inizializzazione
-    loadProductsFromGoogleSheets();
+    initDatabase();
   </script>
 </body>
 </html>
