@@ -18,7 +18,7 @@
         <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch</span>
       </div>
       <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-slate-200 bg-slate-100 text-slate-700">
-        Database: Pronto
+        Database: Inizializzazione...
       </span>
     </div>
   </header>
@@ -26,13 +26,12 @@
   <!-- MAIN -->
   <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-12 flex flex-col items-center">
     
-    <!-- PROMPT HERO SECTION -->
     <section class="w-full text-center space-y-6 my-auto max-w-2xl">
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> cucito sui tuoi vincoli.
+        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Scrivi liberamente: l'algoritmo calcolerà il kit rispettando budget, clima e stile di viaggio.
+        Scrivi liberamente. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative.
       </p>
 
       <div class="pt-2">
@@ -42,7 +41,7 @@
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Trekking invernale freddo con budget sotto i 400 euro..." 
+              placeholder="Es: Trekking freddo con il cane, budget 300 euro..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
             />
           </div>
@@ -52,13 +51,6 @@
             class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
             ⚡ Genera Kit
           </button>
-        </div>
-
-        <!-- SUGGERIMENTI RAPIDI -->
-        <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs">
-          <button onclick="setPrompt('Trekking invernale sotto zero con budget massimo 400 euro')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">❄️ Inverno &lt; 400€</button>
-          <button onclick="setPrompt('Voglio spendere poco, massimo 250 euro per iniziare')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">💰 Budget Super Economy</button>
-          <button onclick="setPrompt('Trekking ultraleggero 3 giorni sulle Alpi')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🪶 Ultralight Alpi</button>
         </div>
       </div>
     </section>
@@ -75,12 +67,12 @@
           <p id="scenario-desc" class="text-sm text-slate-600"></p>
         </div>
         <div class="flex gap-3 w-full md:w-auto">
-          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px]">
-            <span class="text-[11px] font-medium text-slate-500 block">Peso Base</span>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px] shadow-inner">
+            <span class="text-[11px] font-medium text-slate-500 block uppercase tracking-wider">Peso Totale</span>
             <span id="stat-weight" class="text-xl font-extrabold text-slate-900">0.0 kg</span>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px]">
-            <span class="text-[11px] font-medium text-slate-500 block">Costo Stimato</span>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-center min-w-[120px] shadow-inner">
+            <span class="text-[11px] font-medium text-slate-500 block uppercase tracking-wider">Costo Kit</span>
             <span id="stat-price" class="text-xl font-extrabold text-emerald-600">0 €</span>
           </div>
         </div>
@@ -88,7 +80,10 @@
 
       <!-- PRODOTTI -->
       <div>
-        <h3 class="text-sm font-semibold text-slate-900 mb-3">📦 Equipaggiamento Consigliato (Ottimizzato)</h3>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-sm font-semibold text-slate-900">📦 Equipaggiamento Consigliato</h3>
+          <span class="text-xs text-slate-500">Usa i menu per cambiare prodotto</span>
+        </div>
         <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
@@ -96,73 +91,30 @@
   </main>
 
   <script>
-    // Se vuoi collegarlo a Google Fogli, inserisci qui i link CSV pubblicati.
-    // Se lasci vuoti, userà il database locale integrato ricco di opzioni.
-const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
-const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
+    // Inserisci qui i link ai CSV di Google Fogli per rendere il database dinamico.
+    const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
+    const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
 
-    // DATABASE LOCALE AMPLIATO (Fallback & Default)
-    let DB = {
-      scenarios: [
-        { id: "SCEN-001", name: "Primo Bivacco Estivo", desc: "Escursione estiva senza impegnare cifre elevate.", profile: "Budget", keywords: "primo, principiante, economico, budget, estate, mare, facile, poco, spendere" },
-        { id: "SCEN-002", name: "Trekking 3+ Giorni Ultralight", desc: "Attrezzatura tecnica e leggera per massimi dislivelli.", profile: "Ultralight", keywords: "ultralight, leggero, 3 giorni, dislivello, alpi, dolomiti, tecnico, fatica, grammi" },
-        { id: "SCEN-003", name: "Fast & Light Weekend", desc: "Equilibrio perfetto tra comfort e peso per 2 giorni.", profile: "Bilanciato", keywords: "weekend, 2 giorni, veloce, bilanciato, appennini, duchessa, lago, rapido" },
-        { id: "SCEN-004", name: "Spedizione Invernale / Freddo", desc: "Isolamento termico estremo per basse temperature e neve.", profile: "4-Stagioni", keywords: "freddo, inverno, neve, sotto zero, ghiaccio, termico, perù, alta quota, ghiacciaio, 4-stagioni" },
-        { id: "SCEN-005", name: "Campeggio Stanziale Comfort", desc: "Massimo comfort con arrivo in auto, peso non vincolante.", profile: "Comfort", keywords: "famiglia, stanziale, campeggio, comfort, comodo, macchina, bambini, relax" }
-      ],
-      products: [
-        // Tende
-        { id: "P01", name: "Cloud Up 2 Upgrade", brand: "Naturehike", category: "Tenda", price: 130, weight: 1400, profile: "Budget", url: "https://amazon.it" },
-        { id: "P02", name: "MT900 2 Posti", brand: "Forclaz", category: "Tenda", price: 220, weight: 1950, profile: "Bilanciato", url: "https://decathlon.it" },
-        { id: "P03", name: "Copper Spur HV UL2", brand: "Big Agnes", category: "Tenda", price: 490, weight: 1200, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "P04", name: "Svalbard 3", brand: "Ferrino", category: "Tenda", price: 450, weight: 4100, profile: "4-Stagioni", url: "https://ferrino.it" },
-        { id: "P05", name: "MH100 2 Posti", brand: "Decathlon", category: "Tenda", price: 45, weight: 2400, profile: "Comfort", url: "https://decathlon.it" },
+    let DB = { scenarios: [], products: [] };
 
-        // Sacchi a Pelo
-        { id: "P06", name: "MT500 Synth 8°C", brand: "Forclaz", category: "Sacco a Pelo", price: 55, weight: 980, tempComfort: 8, profile: "Budget", url: "https://decathlon.it" },
-        { id: "P07", name: "Arpenaz 20°C", brand: "Decathlon", category: "Sacco a Pelo", price: 20, weight: 1100, tempComfort: 20, profile: "Comfort", url: "https://decathlon.it" },
-        { id: "P08", name: "Lite Line 300", brand: "Cumulus", category: "Sacco a Pelo", price: 270, weight: 600, tempComfort: 4, profile: "Ultralight", url: "https://cumulus.equipment" },
-        { id: "P09", name: "Spark SpII", brand: "Sea to Summit", category: "Sacco a Pelo", price: 380, weight: 490, tempComfort: -2, profile: "Bilanciato", url: "https://bergfreunde.it" },
-        { id: "P10", name: "Panyam 450 (-6°C)", brand: "Cumulus", category: "Sacco a Pelo", price: 360, weight: 830, tempComfort: -6, profile: "4-Stagioni", url: "https://cumulus.equipment" },
+    // Stato dell'applicazione per le scelte interattive
+    let currentScenario = null;
+    let availableOptions = {}; // Contiene tutte le alternative filtrate per categoria
+    let currentKit = {};       // Contiene i prodotti attualmente selezionati
 
-        // Materassini
-        { id: "P11", name: "Trek 100 Schiuma", brand: "Forclaz", category: "Materassino", price: 18, weight: 370, rValue: 1.5, profile: "Budget", url: "https://decathlon.it" },
-        { id: "P12", name: "Insulated Static V", brand: "Klymit", category: "Materassino", price: 85, weight: 700, rValue: 4.4, profile: "Bilanciato", url: "https://amazon.it" },
-        { id: "P13", name: "NeoAir XLite NXT", brand: "Therm-a-Rest", category: "Materassino", price: 220, weight: 370, rValue: 4.5, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "P14", name: "NeoAir XTherm NXT", brand: "Therm-a-Rest", category: "Materassino", price: 260, weight: 430, rValue: 7.3, profile: "4-Stagioni", url: "https://bergfreunde.it" },
-        { id: "P15", name: "MegaMat 10", brand: "Exped", category: "Materassino", price: 200, weight: 2070, rValue: 8.1, profile: "Comfort", url: "https://bergfreunde.it" },
-
-        // Zaini
-        { id: "P16", name: "MT500 Air 50L", brand: "Forclaz", category: "Zaino", price: 110, weight: 1700, profile: "Budget", url: "https://decathlon.it" },
-        { id: "P17", name: "Exos 48", brand: "Osprey", category: "Zaino", price: 210, weight: 1250, profile: "Bilanciato", url: "https://bergfreunde.it" },
-        { id: "P18", name: "Crown3 60", brand: "Granite Gear", category: "Zaino", price: 240, weight: 1080, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "P19", name: "Mutant 38", brand: "Osprey", category: "Zaino", price: 180, weight: 1200, profile: "4-Stagioni", url: "https://amazon.it" },
-        { id: "P20", name: "Aircontact Core 60", brand: "Deuter", category: "Zaino", price: 220, weight: 2310, profile: "Comfort", url: "https://bergfreunde.it" },
-
-        // Fornelletti
-        { id: "P21", name: "BRS-3000T", brand: "BRS", category: "Fornelletto", price: 19, weight: 25, profile: "Budget", url: "https://amazon.it" },
-        { id: "P22", name: "PocketRocket 2", brand: "MSR", category: "Fornelletto", price: 45, weight: 73, profile: "Bilanciato", url: "https://amazon.it" },
-        { id: "P23", name: "WindMaster", brand: "SOTO", category: "Fornelletto", price: 80, weight: 87, profile: "Ultralight", url: "https://bergfreunde.it" },
-        { id: "P24", name: "Reactor 1.0L", brand: "MSR", category: "Fornelletto", price: 220, weight: 417, profile: "4-Stagioni", url: "https://amazon.it" },
-        { id: "P25", name: "Trangia 27-1 UL", brand: "Trangia", category: "Fornelletto", price: 70, weight: 690, profile: "Comfort", url: "https://amazon.it" }
-      ]
-    };
-
-    // Inizializzazione dati da GSheets se configurati
+    // === 1. CARICAMENTO DATI (Da Fogli o array vuoto per ora) ===
     async function initDatabase() {
-      if (!URL_CSV_SCENARI || URL_CSV_SCENARI.includes("LINK")) return;
       try {
+        if (!URL_CSV_SCENARI || !URL_CSV_PRODOTTI) throw new Error("Link CSV non presenti");
+        
         const [resScen, resProd] = await Promise.all([fetch(URL_CSV_SCENARI), fetch(URL_CSV_PRODOTTI)]);
-        const txtScen = await resScen.text();
-        const txtProd = await resProd.text();
-
-        DB.scenarios = txtScen.split(/\r?\n/).slice(1).map(l => {
-          const v = l.split(',').map(s => s.trim());
+        DB.scenarios = (await resScen.text()).split(/\r?\n/).slice(1).map(l => {
+          const v = l.split('\t').map(s => s.trim()); // usa '\t' o ',' a seconda di come pubblichi il CSV
           return v.length > 3 ? { id: v[0], name: v[1], desc: v[2], profile: v[3], keywords: v[4] || "" } : null;
         }).filter(Boolean);
 
-        DB.products = txtProd.split(/\r?\n/).slice(1).map(l => {
-          const v = l.split(',').map(s => s.trim());
+        DB.products = (await resProd.text()).split(/\r?\n/).slice(1).map(l => {
+          const v = l.split('\t').map(s => s.trim());
           return v.length > 5 ? {
             id: v[0], name: v[1], brand: v[2], category: v[3],
             price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
@@ -171,122 +123,131 @@ const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_
           } : null;
         }).filter(Boolean);
 
-        document.getElementById("data-status").innerText = "Database: Google Fogli (Live)";
+        document.getElementById("data-status").innerText = "Database Connesso (GSheets)";
         document.getElementById("data-status").className = "text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700";
       } catch (e) {
-        console.warn("Usando database locale di fallback");
+        document.getElementById("data-status").innerText = "Attesa Link Database...";
       }
     }
 
-    function setPrompt(text) {
-      document.getElementById("user-prompt").value = text;
-      processPrompt();
-    }
-
-    // =========================================================================
-    // MOTORE DI SELEZIONE INTELLIGENTE (CON BUDGET E CLIMA)
-    // =========================================================================
+    // === 2. MOTORE DI RICERCA NLP ===
     function processPrompt() {
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
-      if (!promptText.trim()) return;
+      if (!promptText.trim() || DB.scenarios.length === 0) return;
 
-      // 1. Estrazione Budget numerico se presente (es. "sotto i 400 euro" -> 400)
-      const budgetRegex = /(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i;
-      const budgetMatch = promptText.match(budgetRegex);
-      const maxBudget = budgetMatch ? parseInt(budgetMatch[1]) : null;
+      const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
+      const isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
+      const isUltralight = ["ultralight", "leggero", "grammi"].some(w => promptText.includes(w));
+      const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
 
-      // 2. Riconoscimento Clima / Condizioni
-      const isCold = promptText.includes("freddo") || promptText.includes("inverno") || promptText.includes("neve") || promptText.includes("sotto zero");
-      const isUltralight = promptText.includes("ultralight") || promptText.includes("leggero") || promptText.includes("grammi");
-      const isBudget = promptText.includes("poco") || promptText.includes("economico") || promptText.includes("budget") || promptText.includes("spendere");
-
-      // Profilo di base
       let targetProfile = "Bilanciato";
       if (isCold) targetProfile = "4-Stagioni";
       else if (isUltralight) targetProfile = "Ultralight";
-      else if (isBudget || (maxBudget && maxBudget < 300)) targetProfile = "Budget";
+      else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
 
-      // Trova lo scenario migliore dal DB
-      let bestScenario = DB.scenarios.find(s => s.profile === targetProfile) || DB.scenarios[0];
-      let maxScore = 0;
+      let maxScore = -1;
       DB.scenarios.forEach(scen => {
         let score = 0;
-        scen.keywords.toLowerCase().split(',').forEach(kw => {
-          if (kw.trim() && promptText.includes(kw.trim())) score++;
-        });
-        if (score > maxScore) {
-          maxScore = score;
-          bestScenario = scen;
-        }
+        scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
+        if (score > maxScore) { maxScore = score; currentScenario = scen; }
       });
 
-      // 3. SELEZIONE PRODOTTI CATEGORIA PER CATEGORIA
+      // Prepariamo le liste di alternative per categoria
       const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
-      let kitProducts = [];
-
+      
       categories.forEach(cat => {
-        const catProducts = DB.products.filter(p => p.category === cat);
+        let validProducts = DB.products.filter(p => p.category === cat);
         
-        // Cerca prima il prodotto ideale per il profilo target
-        let chosen = catProducts.find(p => p.profile === bestScenario.profile);
-        
-        // Se c'è un budget massimo stretto e il totale rischia di sforare, filtriamo i prodotti più economici
-        if (maxBudget) {
-          const sortedByPrice = [...catProducts].sort((a, b) => a.price - b.price);
-          // Seleziona il più economico che soddisfa il clima (se richiesto freddo, prendiamo prodotti adatti)
-          if (isCold && cat === 'Sacco a Pelo') {
-            chosen = sortedByPrice.find(p => p.tempComfort && parseFloat(p.tempComfort) <= 0) || sortedByPrice[0];
-          } else {
-            chosen = sortedByPrice[0]; // Prende l'opzione più economica per rientrare nel budget
-          }
-        } else if (!chosen) {
-          chosen = catProducts[0];
+        // Se c'è freddo, scartiamo roba estiva
+        if (isCold && cat === 'Sacco a Pelo') {
+          validProducts = validProducts.filter(p => p.tempComfort && parseFloat(p.tempComfort) <= 0);
         }
 
-        if (chosen) kitProducts.push(chosen);
+        // Ordiniamo mettendo prima i prodotti che matchano il profilo (es. Ultralight) e poi il prezzo
+        validProducts.sort((a, b) => {
+          if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
+          if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
+          return a.price - b.price;
+        });
+
+        // Salviamo le alternative e impostiamo il primo come default
+        availableOptions[cat] = validProducts.slice(0, 5); // Teniamo le top 5 alternative
+        currentKit[cat] = validProducts[0] || null;
       });
 
-      renderKit(bestScenario, kitProducts);
+      renderKit();
     }
 
-    function renderKit(scenario, kit) {
+    // === 3. GESTIONE SCAMBIO PRODOTTO (Dropdown) ===
+    window.swapProduct = function(category, productId) {
+      const newSelected = availableOptions[category].find(p => p.id === productId);
+      if (newSelected) {
+        currentKit[category] = newSelected;
+        renderKit(); // Ridisegna l'interfaccia con i nuovi totali
+      }
+    };
+
+    // === 4. RENDERIZZAZIONE INTERFACCIA ===
+    function renderKit() {
       document.getElementById("results-section").classList.remove("hidden");
-      document.getElementById("results-section").scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById("scenario-title").innerText = currentScenario.name;
+      document.getElementById("scenario-desc").innerText = currentScenario.desc;
+      document.getElementById("scenario-tag").innerText = `Profilo Trovato: ${currentScenario.profile}`;
 
-      document.getElementById("scenario-title").innerText = scenario.name;
-      document.getElementById("scenario-desc").innerText = scenario.desc;
-      document.getElementById("scenario-tag").innerText = `Profilo: ${scenario.profile}`;
-
-      const totalWeight = kit.reduce((acc, p) => acc + p.weight, 0);
-      const totalPrice = kit.reduce((acc, p) => acc + p.price, 0);
+      // Calcolo Totali Dinamico
+      const kitArray = Object.values(currentKit).filter(Boolean);
+      const totalWeight = kitArray.reduce((acc, p) => acc + p.weight, 0);
+      const totalPrice = kitArray.reduce((acc, p) => acc + p.price, 0);
 
       document.getElementById("stat-weight").innerText = `${(totalWeight / 1000).toFixed(2)} kg`;
       document.getElementById("stat-price").innerText = `${totalPrice} €`;
 
-      document.getElementById("products-list").innerHTML = kit.map(p => `
-        <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition-all">
+      // Generazione Schede
+      document.getElementById("products-list").innerHTML = kitArray.map(p => {
+        const altOptions = availableOptions[p.category].map(alt => 
+          `<option value="${alt.id}" ${alt.id === p.id ? 'selected' : ''}>
+            ${alt.name} (${alt.price}€ - ${alt.weight}g)
+          </option>`
+        ).join('');
+
+        return `
+        <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm transition-all relative overflow-hidden group">
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                 ${p.category}
               </span>
-              <span class="text-xs text-slate-500 font-medium">${p.brand}</span>
+              <span class="text-xs text-slate-400 font-semibold">${p.brand}</span>
             </div>
+            
             <h4 class="font-bold text-slate-900 text-sm mb-3">${p.name}</h4>
-            <div class="space-y-1 text-xs text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-              <div class="flex justify-between"><span>Peso:</span> <strong class="text-slate-900">${p.weight} g</strong></div>
-              ${p.tempComfort ? `<div class="flex justify-between"><span>Temp Comfort:</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
-              ${p.rValue ? `<div class="flex justify-between"><span>Isolamento:</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
+            
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+              <div class="flex flex-col"><span>Peso</span> <strong class="text-slate-900">${p.weight} g</strong></div>
+              ${p.tempComfort ? `<div class="flex flex-col"><span>Temp Comfort</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
+              ${p.rValue ? `<div class="flex flex-col"><span>Isolamento</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
+              ${!p.tempComfort && !p.rValue ? `<div class="flex flex-col"><span>Profilo</span> <strong class="text-slate-900">${p.profile}</strong></div>` : ''}
+            </div>
+
+            <!-- DROPDOWN PER CAMBIARE PRODOTTO -->
+            <div class="mb-4">
+              <label class="text-[10px] uppercase font-semibold text-slate-400 mb-1 block">Cambia opzione:</label>
+              <select 
+                onchange="swapProduct('${p.category}', this.value)"
+                class="w-full text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer truncate">
+                ${altOptions}
+              </select>
             </div>
           </div>
+
           <div class="pt-3 border-t border-slate-100 flex justify-between items-center mt-auto">
-            <span class="text-base font-extrabold text-slate-900">${p.price} €</span>
-            <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-              Store ↗
+            <span class="text-lg font-extrabold text-emerald-600">${p.price} €</span>
+            <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="text-slate-500 hover:text-emerald-600 text-xs font-semibold px-2 py-1 transition-colors flex items-center gap-1">
+              Store <span class="text-[14px]">↗</span>
             </a>
           </div>
         </div>
-      `).join('');
+      `}).join('');
     }
 
     document.getElementById("user-prompt")?.addEventListener("keypress", (e) => {
