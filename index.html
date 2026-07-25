@@ -15,7 +15,7 @@
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">🌲</div>
-        <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch <span class="text-[10px] font-bold text-white bg-blue-500 px-1.5 py-0.5 rounded ml-1 uppercase">Smart Geo</span></span>
+        <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch</span>
       </div>
       <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 transition-colors">
         Connessione a GSheets...
@@ -31,7 +31,7 @@
         Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Scrivi liberamente o usa i filtri guidati. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
+        Scrivi liberamente o usa i filtri. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
       </p>
 
       <div class="pt-2 w-full">
@@ -42,7 +42,7 @@
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Trekking sul Terminillo dal 12 al 15 agosto..." 
+              placeholder="Es: Trekking invernale freddo con budget sotto i 350 euro..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
             />
           </div>
@@ -50,7 +50,7 @@
             id="btn-generate"
             onclick="processPrompt()" 
             class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2 opacity-50 cursor-not-allowed" disabled>
-            <span id="btn-text">⚡ Genera Kit</span>
+            ⚡ Genera Kit
           </button>
         </div>
 
@@ -62,9 +62,10 @@
           </button>
         </div>
 
-        <!-- PANNELLO FILTRI MANUALI -->
+        <!-- PANNELLO FILTRI (Nascosto di default) -->
         <div id="filters-panel" class="hidden mt-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm text-left transition-all">
           <div class="space-y-4">
+            <!-- Categoria 1 -->
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Clima / Ambiente</p>
               <div class="flex flex-wrap gap-2">
@@ -73,6 +74,7 @@
                 <button onclick="toggleChip(this, 'deserto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Deserto</button>
               </div>
             </div>
+            <!-- Categoria 2 -->
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stile / Priorità</p>
               <div class="flex flex-wrap gap-2">
@@ -81,6 +83,7 @@
                 <button onclick="toggleChip(this, 'comfort')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Comfort / Stanziale</button>
               </div>
             </div>
+            <!-- Categoria 3 -->
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Esigenze Specifiche & Budget</p>
               <div class="flex flex-wrap gap-2">
@@ -99,22 +102,6 @@
     <section id="results-section" class="w-full space-y-6 mt-12 hidden transition-all duration-500">
       <div class="border-t border-slate-200 pt-8"></div>
       
-      <!-- GEO WEATHER WIDGET -->
-      <div id="weather-widget" class="hidden bg-gradient-to-r from-blue-900 to-slate-800 rounded-2xl p-6 text-white shadow-lg flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <div class="text-4xl" id="weather-icon">🌤️</div>
-          <div>
-            <h4 class="text-xs font-bold text-blue-300 uppercase tracking-wider mb-1">Motore Geo-Termico Attivato</h4>
-            <p class="text-lg font-semibold leading-tight" id="weather-location-text">Destinazione rilevata</p>
-            <p class="text-sm text-slate-300 mt-1" id="weather-details-text">Altitudine e Periodo</p>
-          </div>
-        </div>
-        <div class="bg-white/10 border border-white/20 rounded-xl p-3 text-center min-w-[140px] backdrop-blur-sm">
-          <span class="block text-[10px] uppercase font-bold text-blue-200 tracking-wider">T. Notturna Stimata</span>
-          <span class="text-2xl font-extrabold" id="weather-temp-text">0°C</span>
-        </div>
-      </div>
-
       <!-- BANNER STATS -->
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div class="space-y-1">
@@ -147,6 +134,9 @@
   </main>
 
   <script>
+    // ==========================================
+    // 1. CONFIGURAZIONE E COLLEGAMENTO A GSHEETS
+    // ==========================================
     const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
     const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
 
@@ -154,11 +144,9 @@
     let currentScenario = null;
     let availableOptions = {}; 
     let currentKit = {};       
-    let activeFilters = new Set();
-    
-    const NOMI_MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-    const TEMP_BASE_MARE = [12, 13, 15, 19, 24, 28, 31, 31, 27, 22, 16, 13];
+    let activeFilters = new Set(); // Per memorizzare i filtri manuali scelti
 
+    // Parser CSV robusto (gestisce le virgole all'interno di eventuali testi tra virgolette)
     function parseCSVLine(text) {
       const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
       return text.split(re).map(s => s.replace(/^"|"$/g, '').trim());
@@ -180,39 +168,49 @@
           return v.length > 5 ? {
             id: v[0], name: v[1], brand: v[2], category: v[3],
             price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
-            tempComfort: v[6]!=='-'?parseFloat(v[6]):undefined, 
-            rValue: v[7]!=='-'?parseFloat(v[7]):undefined,
+            tempComfort: v[6]!=='-'?v[6]:undefined, rValue: v[7]!=='-'?v[7]:undefined,
             profile: v[8], url: v[9]||"#"
           } : null;
         }).filter(Boolean);
 
+        // Attiva UI
         const btn = document.getElementById("btn-generate");
         btn.disabled = false;
         btn.classList.remove("opacity-50", "cursor-not-allowed");
+        
         const status = document.getElementById("data-status");
         status.innerText = "Database: GSheets (Live)";
         status.className = "text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700";
 
       } catch (e) {
-        console.error("Errore DB:", e);
+        console.error("Errore caricamento database:", e);
+        const status = document.getElementById("data-status");
+        status.innerText = "Errore di connessione a GSheets";
+        status.className = "text-xs font-medium px-3 py-1 rounded-full border border-red-200 bg-red-50 text-red-700";
       }
     }
 
-    // GESTIONE FILTRI MANUALI
+    // ==========================================
+    // 2. GESTIONE FILTRI MANUALI (UI)
+    // ==========================================
     window.toggleFiltersPanel = function() {
-      document.getElementById('filters-panel').classList.toggle('hidden');
+      const panel = document.getElementById('filters-panel');
+      panel.classList.toggle('hidden');
     }
 
     window.toggleChip = function(btnElement, keyword) {
       if(activeFilters.has(keyword)) {
         activeFilters.delete(keyword);
+        // Stile disattivo
         btnElement.classList.remove('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
         btnElement.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
       } else {
         activeFilters.add(keyword);
+        // Stile attivo
         btnElement.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
         btnElement.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
       }
+      
       updatePromptInput();
     }
 
@@ -221,160 +219,65 @@
       if (activeFilters.size === 0) {
         promptInput.value = "";
       } else {
-        promptInput.value = "Kit per: " + Array.from(activeFilters).join(", ");
+        const phrases = Array.from(activeFilters);
+        promptInput.value = "Cerco un kit per: " + phrases.join(", ");
       }
     }
 
-    // MOTORE GEO-METEO
-    async function analyzeGeographyAndWeather(promptText) {
-      let result = { hasGeo: false, locationName: "", elevation: 0, monthName: "", estimatedMinTemp: null };
-      
-      let meseIndex = NOMI_MESI.findIndex(m => promptText.includes(m));
-      if (meseIndex === -1) meseIndex = new Date().getMonth();
-      result.monthName = NOMI_MESI[meseIndex];
-
-      const regexLuogo = /(?:sul|sulla|sulle|al|alla|alle|in|a|verso|presso)\s+([a-zA-Zèéàòùì'\s]+?)(?=\s+(?:dal|al|nel|nei|per|con|e|agosto|settembre|ottobre|novembre|dicembre|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|\d)|$)/i;
-      const match = promptText.match(regexLuogo);
-
-      let locationQuery = "";
-      if (match && match[1]) {
-        locationQuery = match[1].trim();
-      } else {
-        const stopWords = ['gita', 'trekking', 'escursione', 'campeggio', 'weekend', 'viaggio', 'spedizione', 'del', 'un', 'uno', 'una', 'circa'];
-        let words = promptText
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
-          .split(/\s+/)
-          .filter(w => w.length > 1 && !stopWords.includes(w) && !NOMI_MESI.includes(w) && isNaN(w));
-        if (words.length > 0) {
-          locationQuery = words.slice(-2).join(" ");
-        }
-      }
-
-      if (locationQuery) {
-        try {
-          const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=it`);
-          const geoData = await res.json();
-          
-          if (geoData.results && geoData.results.length > 0) {
-            const loc = geoData.results[0];
-            result.hasGeo = true;
-            result.locationName = loc.name;
-            result.elevation = loc.elevation || 0;
-            
-            const maxTempMare = TEMP_BASE_MARE[meseIndex];
-            const maxTempQuota = maxTempMare - (result.elevation / 100 * 0.65);
-            result.estimatedMinTemp = Math.round(maxTempQuota - 10); 
-          }
-        } catch(e) { console.log("Geocoding failed", e); }
-      }
-      return result;
-    }
-
-    window.processPrompt = async function() {
-      const btn = document.getElementById("btn-generate");
-      const btnText = document.getElementById("btn-text");
+    // ==========================================
+    // 3. MOTORE NLP E GENERAZIONE KIT
+    // ==========================================
+    window.processPrompt = function() {
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
-      
       if (!promptText.trim() || DB.scenarios.length === 0) return;
 
-      btn.disabled = true;
-      btnText.innerText = "🛰️ Analisi Geo-Meteo...";
+      const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
+      const isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
+      const isUltralight = ["ultralight", "leggero", "grammi"].some(w => promptText.includes(w));
+      const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
 
-      try {
-        const geoInfo = await analyzeGeographyAndWeather(promptText);
+      let targetProfile = "Bilanciato";
+      if (isCold) targetProfile = "4-Stagioni";
+      else if (isUltralight) targetProfile = "Ultralight";
+      else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
 
-        const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
-        const isUltralight = ["ultralight", "leggero", "grammi", "corsa"].some(w => promptText.includes(w));
-        const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
+      let maxScore = -1;
+      DB.scenarios.forEach(scen => {
+        let score = 0;
+        scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
+        if (score > maxScore) { maxScore = score; currentScenario = scen; }
+      });
+
+      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
+      
+      categories.forEach(cat => {
+        let validProducts = DB.products.filter(p => p.category === cat);
         
-        let targetProfile = "Bilanciato";
-        let isCold = false;
-
-        if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-           if (geoInfo.estimatedMinTemp <= 5) isCold = true;
-        } else {
-           isCold = ["freddo", "inverno", "neve", "sotto zero", "dicembre", "gennaio", "febbraio"].some(w => promptText.includes(w));
+        if (isCold && cat === 'Sacco a Pelo') {
+          validProducts = validProducts.filter(p => p.tempComfort && parseFloat(p.tempComfort) <= 0);
         }
 
-        if (isCold) targetProfile = "4-Stagioni";
-        else if (isUltralight) targetProfile = "Ultralight";
-        else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
-
-        // Selezione Intelligente Scenario basata sul profilo (evita fallback errato su estate)
-        let matchedScenario = DB.scenarios.find(scen => scen.profile.toLowerCase() === targetProfile.toLowerCase());
-        if (!matchedScenario) {
-          let maxScore = -1;
-          DB.scenarios.forEach(scen => {
-            let score = 0;
-            scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
-            if (score > maxScore) { maxScore = score; matchedScenario = scen; }
-          });
-        }
-        currentScenario = matchedScenario || DB.scenarios[0];
-
-        const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
-        
-        categories.forEach(cat => {
-          let validProducts = DB.products.filter(p => p.category === cat);
-          
-          // Filtri termici avanzati per categorie
-          if (cat === 'Sacco a Pelo') {
-            if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-              validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
-            } else if (isCold) {
-              validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
-            }
-            if(validProducts.length === 0) {
-              validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
-            }
-          } else if (cat === 'Materassino' && isCold) {
-            // Preferenza R-Value più alto per il freddo
-            validProducts.sort((a, b) => parseFloat(b.rValue || 0) - parseFloat(a.rValue || 0));
-          }
-
-          validProducts.sort((a, b) => {
-            if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
-            if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
-            return a.price - b.price;
-          });
-
-          availableOptions[cat] = validProducts.slice(0, 5); 
-          currentKit[cat] = validProducts[0] || null;
+        validProducts.sort((a, b) => {
+          if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
+          if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
+          return a.price - b.price;
         });
 
-        const weatherWidget = document.getElementById("weather-widget");
-        if (geoInfo.hasGeo) {
-          document.getElementById("weather-location-text").innerText = `Destinazione: ${geoInfo.locationName}`;
-          document.getElementById("weather-details-text").innerText = `Altitudine: ${Math.round(geoInfo.elevation)}m slm | Periodo: ${geoInfo.monthName.charAt(0).toUpperCase() + geoInfo.monthName.slice(1)}`;
-          document.getElementById("weather-temp-text").innerText = `${geoInfo.estimatedMinTemp}°C`;
-          
-          let icon = "🌤️";
-          if(geoInfo.estimatedMinTemp <= 0) icon = "❄️";
-          else if (geoInfo.estimatedMinTemp < 10) icon = "🥶";
-          else if (geoInfo.estimatedMinTemp > 20) icon = "🔥";
-          document.getElementById("weather-icon").innerText = icon;
+        availableOptions[cat] = validProducts.slice(0, 5); 
+        currentKit[cat] = validProducts[0] || null;
+      });
 
-          weatherWidget.classList.remove("hidden");
-          weatherWidget.classList.add("flex");
-        } else {
-          weatherWidget.classList.add("hidden");
-          weatherWidget.classList.remove("flex");
-        }
-
-        document.getElementById('filters-panel').classList.add('hidden');
-        renderKit();
-
-      } catch (err) {
-        console.error("Errore durante l'elaborazione del prompt:", err);
-      } finally {
-        btn.disabled = false;
-        btnText.innerText = "⚡ Genera Kit";
-      }
+      // Chiudi il pannello filtri per fare spazio ai risultati
+      document.getElementById('filters-panel').classList.add('hidden');
+      renderKit();
     }
 
     window.swapProduct = function(category, productId) {
       const newSelected = availableOptions[category].find(p => p.id === productId);
-      if (newSelected) { currentKit[category] = newSelected; renderKit(); }
+      if (newSelected) {
+        currentKit[category] = newSelected;
+        renderKit(); 
+      }
     };
 
     function renderKit() {
@@ -411,9 +314,9 @@
             
             <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
               <div class="flex flex-col"><span>Peso</span> <strong class="text-slate-900">${p.weight} g</strong></div>
-              ${p.tempComfort !== undefined ? `<div class="flex flex-col"><span>Comfort</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
-              ${p.rValue !== undefined ? `<div class="flex flex-col"><span>Isolamento</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
-              ${p.tempComfort === undefined && p.rValue === undefined ? `<div class="flex flex-col"><span>Profilo</span> <strong class="text-slate-900">${p.profile}</strong></div>` : ''}
+              ${p.tempComfort ? `<div class="flex flex-col"><span>Comfort</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
+              ${p.rValue ? `<div class="flex flex-col"><span>Isolamento</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
+              ${!p.tempComfort && !p.rValue ? `<div class="flex flex-col"><span>Profilo</span> <strong class="text-slate-900">${p.profile}</strong></div>` : ''}
             </div>
 
             <div class="mb-4">
@@ -436,20 +339,11 @@
       `}).join('');
     }
 
-    const promptInput = document.getElementById("user-prompt");
-    promptInput?.addEventListener("keypress", (e) => {
+    document.getElementById("user-prompt")?.addEventListener("keypress", (e) => {
       if (e.key === "Enter") processPrompt();
     });
-    
-    // Sblocca sempre il pulsante quando si digita qualcosa di nuovo
-    promptInput?.addEventListener("input", () => {
-      const btn = document.getElementById("btn-generate");
-      if(DB.scenarios.length > 0) {
-        btn.disabled = false;
-        btn.classList.remove("opacity-50", "cursor-not-allowed");
-      }
-    });
 
+    // Inizializza il DB al caricamento della pagina
     initDatabase();
   </script>
 </body>
