@@ -30,7 +30,7 @@
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
         Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
-      <!-- Sottotitolo fisso e generico come richiesto -->
+      <!-- Sottotitolo fisso e generico -->
       <p class="text-sm sm:text-base text-slate-600">
         Scrivi liberamente o usa i filtri guidati. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
       </p>
@@ -55,7 +55,7 @@
           </button>
         </div>
 
-        <!-- TOGGLE FILTRI MANUALI (Ripristinati) -->
+        <!-- TOGGLE FILTRI MANUALI -->
         <div class="mt-4 text-center">
           <button onclick="toggleFiltersPanel()" class="text-xs text-slate-500 hover:text-emerald-600 font-medium inline-flex items-center gap-1.5 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
@@ -227,7 +227,7 @@
     }
 
     // ==========================================
-    // MOTORE ROBUSTO GEO-METEO (Stop-Word Extraction)
+    // MOTORE ROBUSTO GEO-METEO (Regex Geografica)
     // ==========================================
     async function analyzeGeographyAndWeather(promptText) {
       let result = { hasGeo: false, locationName: "", elevation: 0, monthName: "", estimatedMinTemp: null };
@@ -237,18 +237,26 @@
       if (meseIndex === -1) meseIndex = new Date().getMonth();
       result.monthName = NOMI_MESI[meseIndex];
 
-      // 2. Estrazione intelligente del luogo ripulendo stop-words e mesi
-      const stopWords = ['gita', 'trekking', 'escursione', 'campeggio', 'weekend', 'viaggio', 'spedizione', 'dal', 'al', 'del', 'nel', 'in', 'su', 'sul', 'sulla', 'sulle', 'a', 'ad', 'per', 'con', 'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'circa'];
-      
-      let words = promptText
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
-        .split(/\s+/)
-        .filter(w => w.length > 1 && !stopWords.includes(w) && !NOMI_MESI.includes(w) && isNaN(w));
+      // 2. Estrazione accurata del nome del luogo tramite pattern geografico (es. "sul Gran Sasso", "a Cortina d'Ampezzo")
+      const regexLuogo = /(?:sul|sulla|sulle|al|alla|alle|in|a|verso|presso)\s+([a-zA-Zèéàòùì'\s]+?)(?=\s+(?:dal|al|nel|nei|per|con|e|agosto|settembre|ottobre|novembre|dicembre|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|\d)|$)/i;
+      const match = promptText.match(regexLuogo);
 
-      if (words.length > 0) {
-        // Prende le ultime parole rimaste (es. "terminillo" o "gran sasso")
-        let locationQuery = words.slice(-2).join(" "); 
+      let locationQuery = "";
+      if (match && match[1]) {
+        locationQuery = match[1].trim();
+      } else {
+        // Fallback: prende le parole significative se non usa preposizioni canoniche
+        const stopWords = ['gita', 'trekking', 'escursione', 'campeggio', 'weekend', 'viaggio', 'spedizione', 'del', 'un', 'uno', 'una', 'circa'];
+        let words = promptText
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+          .split(/\s+/)
+          .filter(w => w.length > 1 && !stopWords.includes(w) && !NOMI_MESI.includes(w) && isNaN(w));
+        if (words.length > 0) {
+          locationQuery = words.slice(-2).join(" ");
+        }
+      }
 
+      if (locationQuery) {
         try {
           const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=it`);
           const geoData = await res.json();
@@ -278,81 +286,87 @@
       btn.disabled = true;
       btnText.innerText = "🛰️ Analisi Geo-Meteo...";
 
-      const geoInfo = await analyzeGeographyAndWeather(promptText);
+      try {
+        const geoInfo = await analyzeGeographyAndWeather(promptText);
 
-      const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
-      const isUltralight = ["ultralight", "leggero", "grammi", "corsa"].some(w => promptText.includes(w));
-      const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
-      
-      let targetProfile = "Bilanciato";
-      let isCold = false;
-
-      if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-         if (geoInfo.estimatedMinTemp <= 5) isCold = true;
-      } else {
-         isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
-      }
-
-      if (isCold) targetProfile = "4-Stagioni";
-      else if (isUltralight) targetProfile = "Ultralight";
-      else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
-
-      let maxScore = -1;
-      DB.scenarios.forEach(scen => {
-        let score = 0;
-        scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
-        if (score > maxScore) { maxScore = score; currentScenario = scen; }
-      });
-
-      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
-      
-      categories.forEach(cat => {
-        let validProducts = DB.products.filter(p => p.category === cat);
+        const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
+        const isUltralight = ["ultralight", "leggero", "grammi", "corsa"].some(w => promptText.includes(w));
+        const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
         
-        if (cat === 'Sacco a Pelo' && geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-          validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
-        } else if (cat === 'Sacco a Pelo' && isCold) {
-          validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
+        let targetProfile = "Bilanciato";
+        let isCold = false;
+
+        if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
+           if (geoInfo.estimatedMinTemp <= 5) isCold = true;
+        } else {
+           isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
         }
 
-        if(validProducts.length === 0 && cat === 'Sacco a Pelo') {
-          validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
-        }
+        if (isCold) targetProfile = "4-Stagioni";
+        else if (isUltralight) targetProfile = "Ultralight";
+        else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
 
-        validProducts.sort((a, b) => {
-          if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
-          if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
-          return a.price - b.price;
+        let maxScore = -1;
+        DB.scenarios.forEach(scen => {
+          let score = 0;
+          scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
+          if (score > maxScore) { maxScore = score; currentScenario = scen; }
         });
 
-        availableOptions[cat] = validProducts.slice(0, 5); 
-        currentKit[cat] = validProducts[0] || null;
-      });
-
-      const weatherWidget = document.getElementById("weather-widget");
-      if (geoInfo.hasGeo) {
-        document.getElementById("weather-location-text").innerText = `Destinazione: ${geoInfo.locationName}`;
-        document.getElementById("weather-details-text").innerText = `Altitudine: ${Math.round(geoInfo.elevation)}m slm | Periodo: ${geoInfo.monthName.charAt(0).toUpperCase() + geoInfo.monthName.slice(1)}`;
-        document.getElementById("weather-temp-text").innerText = `${geoInfo.estimatedMinTemp}°C`;
+        const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
         
-        let icon = "🌤️";
-        if(geoInfo.estimatedMinTemp <= 0) icon = "❄️";
-        else if (geoInfo.estimatedMinTemp < 10) icon = "🥶";
-        else if (geoInfo.estimatedMinTemp > 20) icon = "🔥";
-        document.getElementById("weather-icon").innerText = icon;
+        categories.forEach(cat => {
+          let validProducts = DB.products.filter(p => p.category === cat);
+          
+          if (cat === 'Sacco a Pelo' && geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
+            validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
+          } else if (cat === 'Sacco a Pelo' && isCold) {
+            validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
+          }
 
-        weatherWidget.classList.remove("hidden");
-        weatherWidget.classList.add("flex");
-      } else {
-        weatherWidget.classList.add("hidden");
-        weatherWidget.classList.remove("flex");
+          if(validProducts.length === 0 && cat === 'Sacco a Pelo') {
+            validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
+          }
+
+          validProducts.sort((a, b) => {
+            if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
+            if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
+            return a.price - b.price;
+          });
+
+          availableOptions[cat] = validProducts.slice(0, 5); 
+          currentKit[cat] = validProducts[0] || null;
+        });
+
+        const weatherWidget = document.getElementById("weather-widget");
+        if (geoInfo.hasGeo) {
+          document.getElementById("weather-location-text").innerText = `Destinazione: ${geoInfo.locationName}`;
+          document.getElementById("weather-details-text").innerText = `Altitudine: ${Math.round(geoInfo.elevation)}m slm | Periodo: ${geoInfo.monthName.charAt(0).toUpperCase() + geoInfo.monthName.slice(1)}`;
+          document.getElementById("weather-temp-text").innerText = `${geoInfo.estimatedMinTemp}°C`;
+          
+          let icon = "🌤️";
+          if(geoInfo.estimatedMinTemp <= 0) icon = "❄️";
+          else if (geoInfo.estimatedMinTemp < 10) icon = "🥶";
+          else if (geoInfo.estimatedMinTemp > 20) icon = "🔥";
+          document.getElementById("weather-icon").innerText = icon;
+
+          weatherWidget.classList.remove("hidden");
+          weatherWidget.classList.add("flex");
+        } else {
+          weatherWidget.classList.add("hidden");
+          weatherWidget.classList.remove("flex");
+        }
+
+        document.getElementById('filters-panel').classList.add('hidden');
+        renderKit();
+
+      } catch (err) {
+        console.error("Errore durante l'elaborazione del prompt:", err);
+      } finally {
+        // Garantisce che il pulsante si sblocchi sempre in qualsiasi circostanza
+        btn.disabled = false;
+        btnText.innerText = "⚡ Genera Kit";
       }
-
-      document.getElementById('filters-panel').classList.add('hidden');
-      renderKit();
-
-      btn.disabled = false;
-      btnText.innerText = "⚡ Genera Kit";
     }
 
     window.swapProduct = function(category, productId) {
