@@ -17,8 +17,8 @@
         <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">🌲</div>
         <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch</span>
       </div>
-      <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-slate-200 bg-slate-100 text-slate-700">
-        Database: Inizializzazione...
+      <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 transition-colors">
+        Connessione a GSheets...
       </span>
     </div>
   </header>
@@ -31,26 +31,69 @@
         Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Scrivi liberamente. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative.
+        Scrivi liberamente o usa i filtri. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
       </p>
 
-      <div class="pt-2">
+      <div class="pt-2 w-full">
+        <!-- BARRA DI RICERCA -->
         <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row gap-2 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
           <div class="flex-1 flex items-center gap-3 px-3">
             <span class="text-slate-400 text-lg">🔍</span>
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Trekking freddo con il cane, budget 300 euro..." 
+              placeholder="Es: Trekking invernale freddo con budget sotto i 350 euro..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
             />
           </div>
           <button 
             id="btn-generate"
             onclick="processPrompt()" 
-            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2 opacity-50 cursor-not-allowed" disabled>
             ⚡ Genera Kit
           </button>
+        </div>
+
+        <!-- TOGGLE FILTRI MANUALI -->
+        <div class="mt-4 text-center">
+          <button onclick="toggleFiltersPanel()" class="text-xs text-slate-500 hover:text-emerald-600 font-medium inline-flex items-center gap-1.5 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            Filtri Guidati
+          </button>
+        </div>
+
+        <!-- PANNELLO FILTRI (Nascosto di default) -->
+        <div id="filters-panel" class="hidden mt-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm text-left transition-all">
+          <div class="space-y-4">
+            <!-- Categoria 1 -->
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Clima / Ambiente</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'estate')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Estivo</button>
+                <button onclick="toggleChip(this, 'freddo')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Freddo / Inverno</button>
+                <button onclick="toggleChip(this, 'deserto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Deserto</button>
+              </div>
+            </div>
+            <!-- Categoria 2 -->
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stile / Priorità</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'ultralight')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Ultralight</button>
+                <button onclick="toggleChip(this, 'economico')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Economico</button>
+                <button onclick="toggleChip(this, 'comfort')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Comfort / Stanziale</button>
+              </div>
+            </div>
+            <!-- Categoria 3 -->
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Esigenze Specifiche & Budget</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'con il cane')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Con il cane</button>
+                <button onclick="toggleChip(this, 'moto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">In Moto</button>
+                <button onclick="toggleChip(this, 'sotto i 300 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 300€</button>
+                <button onclick="toggleChip(this, 'sotto i 600 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 600€</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -82,7 +125,7 @@
       <div>
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-sm font-semibold text-slate-900">📦 Equipaggiamento Consigliato</h3>
-          <span class="text-xs text-slate-500">Usa i menu per cambiare prodotto</span>
+          <span class="text-xs text-slate-500">Usa i menu per esplorare le alternative</span>
         </div>
         <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
@@ -91,30 +134,37 @@
   </main>
 
   <script>
-    // Inserisci qui i link ai CSV di Google Fogli per rendere il database dinamico.
+    // ==========================================
+    // 1. CONFIGURAZIONE E COLLEGAMENTO A GSHEETS
+    // ==========================================
     const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
     const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
 
     let DB = { scenarios: [], products: [] };
-
-    // Stato dell'applicazione per le scelte interattive
     let currentScenario = null;
-    let availableOptions = {}; // Contiene tutte le alternative filtrate per categoria
-    let currentKit = {};       // Contiene i prodotti attualmente selezionati
+    let availableOptions = {}; 
+    let currentKit = {};       
+    let activeFilters = new Set(); // Per memorizzare i filtri manuali scelti
 
-    // === 1. CARICAMENTO DATI (Da Fogli o array vuoto per ora) ===
+    // Parser CSV robusto (gestisce le virgole all'interno di eventuali testi tra virgolette)
+    function parseCSVLine(text) {
+      const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+      return text.split(re).map(s => s.replace(/^"|"$/g, '').trim());
+    }
+
     async function initDatabase() {
       try {
-        if (!URL_CSV_SCENARI || !URL_CSV_PRODOTTI) throw new Error("Link CSV non presenti");
-        
         const [resScen, resProd] = await Promise.all([fetch(URL_CSV_SCENARI), fetch(URL_CSV_PRODOTTI)]);
+        
         DB.scenarios = (await resScen.text()).split(/\r?\n/).slice(1).map(l => {
-          const v = l.split('\t').map(s => s.trim()); // usa '\t' o ',' a seconda di come pubblichi il CSV
+          if(!l.trim()) return null;
+          const v = parseCSVLine(l);
           return v.length > 3 ? { id: v[0], name: v[1], desc: v[2], profile: v[3], keywords: v[4] || "" } : null;
         }).filter(Boolean);
 
         DB.products = (await resProd.text()).split(/\r?\n/).slice(1).map(l => {
-          const v = l.split('\t').map(s => s.trim());
+          if(!l.trim()) return null;
+          const v = parseCSVLine(l);
           return v.length > 5 ? {
             id: v[0], name: v[1], brand: v[2], category: v[3],
             price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
@@ -123,15 +173,61 @@
           } : null;
         }).filter(Boolean);
 
-        document.getElementById("data-status").innerText = "Database Connesso (GSheets)";
-        document.getElementById("data-status").className = "text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700";
+        // Attiva UI
+        const btn = document.getElementById("btn-generate");
+        btn.disabled = false;
+        btn.classList.remove("opacity-50", "cursor-not-allowed");
+        
+        const status = document.getElementById("data-status");
+        status.innerText = "Database: GSheets (Live)";
+        status.className = "text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700";
+
       } catch (e) {
-        document.getElementById("data-status").innerText = "Attesa Link Database...";
+        console.error("Errore caricamento database:", e);
+        const status = document.getElementById("data-status");
+        status.innerText = "Errore di connessione a GSheets";
+        status.className = "text-xs font-medium px-3 py-1 rounded-full border border-red-200 bg-red-50 text-red-700";
       }
     }
 
-    // === 2. MOTORE DI RICERCA NLP ===
-    function processPrompt() {
+    // ==========================================
+    // 2. GESTIONE FILTRI MANUALI (UI)
+    // ==========================================
+    window.toggleFiltersPanel = function() {
+      const panel = document.getElementById('filters-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    window.toggleChip = function(btnElement, keyword) {
+      if(activeFilters.has(keyword)) {
+        activeFilters.delete(keyword);
+        // Stile disattivo
+        btnElement.classList.remove('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
+        btnElement.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
+      } else {
+        activeFilters.add(keyword);
+        // Stile attivo
+        btnElement.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
+        btnElement.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
+      }
+      
+      updatePromptInput();
+    }
+
+    function updatePromptInput() {
+      const promptInput = document.getElementById("user-prompt");
+      if (activeFilters.size === 0) {
+        promptInput.value = "";
+      } else {
+        const phrases = Array.from(activeFilters);
+        promptInput.value = "Cerco un kit per: " + phrases.join(", ");
+      }
+    }
+
+    // ==========================================
+    // 3. MOTORE NLP E GENERAZIONE KIT
+    // ==========================================
+    window.processPrompt = function() {
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
       if (!promptText.trim() || DB.scenarios.length === 0) return;
 
@@ -152,49 +248,44 @@
         if (score > maxScore) { maxScore = score; currentScenario = scen; }
       });
 
-      // Prepariamo le liste di alternative per categoria
       const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
       
       categories.forEach(cat => {
         let validProducts = DB.products.filter(p => p.category === cat);
         
-        // Se c'è freddo, scartiamo roba estiva
         if (isCold && cat === 'Sacco a Pelo') {
           validProducts = validProducts.filter(p => p.tempComfort && parseFloat(p.tempComfort) <= 0);
         }
 
-        // Ordiniamo mettendo prima i prodotti che matchano il profilo (es. Ultralight) e poi il prezzo
         validProducts.sort((a, b) => {
           if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
           if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
           return a.price - b.price;
         });
 
-        // Salviamo le alternative e impostiamo il primo come default
-        availableOptions[cat] = validProducts.slice(0, 5); // Teniamo le top 5 alternative
+        availableOptions[cat] = validProducts.slice(0, 5); 
         currentKit[cat] = validProducts[0] || null;
       });
 
+      // Chiudi il pannello filtri per fare spazio ai risultati
+      document.getElementById('filters-panel').classList.add('hidden');
       renderKit();
     }
 
-    // === 3. GESTIONE SCAMBIO PRODOTTO (Dropdown) ===
     window.swapProduct = function(category, productId) {
       const newSelected = availableOptions[category].find(p => p.id === productId);
       if (newSelected) {
         currentKit[category] = newSelected;
-        renderKit(); // Ridisegna l'interfaccia con i nuovi totali
+        renderKit(); 
       }
     };
 
-    // === 4. RENDERIZZAZIONE INTERFACCIA ===
     function renderKit() {
       document.getElementById("results-section").classList.remove("hidden");
       document.getElementById("scenario-title").innerText = currentScenario.name;
       document.getElementById("scenario-desc").innerText = currentScenario.desc;
-      document.getElementById("scenario-tag").innerText = `Profilo Trovato: ${currentScenario.profile}`;
+      document.getElementById("scenario-tag").innerText = `Profilo: ${currentScenario.profile}`;
 
-      // Calcolo Totali Dinamico
       const kitArray = Object.values(currentKit).filter(Boolean);
       const totalWeight = kitArray.reduce((acc, p) => acc + p.weight, 0);
       const totalPrice = kitArray.reduce((acc, p) => acc + p.price, 0);
@@ -202,7 +293,6 @@
       document.getElementById("stat-weight").innerText = `${(totalWeight / 1000).toFixed(2)} kg`;
       document.getElementById("stat-price").innerText = `${totalPrice} €`;
 
-      // Generazione Schede
       document.getElementById("products-list").innerHTML = kitArray.map(p => {
         const altOptions = availableOptions[p.category].map(alt => 
           `<option value="${alt.id}" ${alt.id === p.id ? 'selected' : ''}>
@@ -224,17 +314,16 @@
             
             <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
               <div class="flex flex-col"><span>Peso</span> <strong class="text-slate-900">${p.weight} g</strong></div>
-              ${p.tempComfort ? `<div class="flex flex-col"><span>Temp Comfort</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
+              ${p.tempComfort ? `<div class="flex flex-col"><span>Comfort</span> <strong class="text-slate-900">${p.tempComfort}°C</strong></div>` : ''}
               ${p.rValue ? `<div class="flex flex-col"><span>Isolamento</span> <strong class="text-slate-900">R-${p.rValue}</strong></div>` : ''}
               ${!p.tempComfort && !p.rValue ? `<div class="flex flex-col"><span>Profilo</span> <strong class="text-slate-900">${p.profile}</strong></div>` : ''}
             </div>
 
-            <!-- DROPDOWN PER CAMBIARE PRODOTTO -->
             <div class="mb-4">
-              <label class="text-[10px] uppercase font-semibold text-slate-400 mb-1 block">Cambia opzione:</label>
+              <label class="text-[10px] uppercase font-semibold text-slate-400 mb-1 block">Sostituisci opzione:</label>
               <select 
                 onchange="swapProduct('${p.category}', this.value)"
-                class="w-full text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer truncate">
+                class="w-full text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer truncate">
                 ${altOptions}
               </select>
             </div>
@@ -254,6 +343,7 @@
       if (e.key === "Enter") processPrompt();
     });
 
+    // Inizializza il DB al caricamento della pagina
     initDatabase();
   </script>
 </body>
