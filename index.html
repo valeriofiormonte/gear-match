@@ -30,7 +30,6 @@
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
         Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
-      <!-- Sottotitolo fisso e generico -->
       <p class="text-sm sm:text-base text-slate-600">
         Scrivi liberamente o usa i filtri guidati. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
       </p>
@@ -182,7 +181,7 @@
             id: v[0], name: v[1], brand: v[2], category: v[3],
             price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
             tempComfort: v[6]!=='-'?parseFloat(v[6]):undefined, 
-            rValue: v[7]!=='-'?v[7]:undefined,
+            rValue: v[7]!=='-'?parseFloat(v[7]):undefined,
             profile: v[8], url: v[9]||"#"
           } : null;
         }).filter(Boolean);
@@ -226,18 +225,14 @@
       }
     }
 
-    // ==========================================
-    // MOTORE ROBUSTO GEO-METEO (Regex Geografica)
-    // ==========================================
+    // MOTORE GEO-METEO
     async function analyzeGeographyAndWeather(promptText) {
       let result = { hasGeo: false, locationName: "", elevation: 0, monthName: "", estimatedMinTemp: null };
       
-      // 1. Trova il mese
       let meseIndex = NOMI_MESI.findIndex(m => promptText.includes(m));
       if (meseIndex === -1) meseIndex = new Date().getMonth();
       result.monthName = NOMI_MESI[meseIndex];
 
-      // 2. Estrazione accurata del nome del luogo tramite pattern geografico (es. "sul Gran Sasso", "a Cortina d'Ampezzo")
       const regexLuogo = /(?:sul|sulla|sulle|al|alla|alle|in|a|verso|presso)\s+([a-zA-Zèéàòùì'\s]+?)(?=\s+(?:dal|al|nel|nei|per|con|e|agosto|settembre|ottobre|novembre|dicembre|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|\d)|$)/i;
       const match = promptText.match(regexLuogo);
 
@@ -245,7 +240,6 @@
       if (match && match[1]) {
         locationQuery = match[1].trim();
       } else {
-        // Fallback: prende le parole significative se non usa preposizioni canoniche
         const stopWords = ['gita', 'trekking', 'escursione', 'campeggio', 'weekend', 'viaggio', 'spedizione', 'del', 'un', 'uno', 'una', 'circa'];
         let words = promptText
           .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
@@ -299,33 +293,43 @@
         if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
            if (geoInfo.estimatedMinTemp <= 5) isCold = true;
         } else {
-           isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
+           isCold = ["freddo", "inverno", "neve", "sotto zero", "dicembre", "gennaio", "febbraio"].some(w => promptText.includes(w));
         }
 
         if (isCold) targetProfile = "4-Stagioni";
         else if (isUltralight) targetProfile = "Ultralight";
         else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
 
-        let maxScore = -1;
-        DB.scenarios.forEach(scen => {
-          let score = 0;
-          scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
-          if (score > maxScore) { maxScore = score; currentScenario = scen; }
-        });
+        // Selezione Intelligente Scenario basata sul profilo (evita fallback errato su estate)
+        let matchedScenario = DB.scenarios.find(scen => scen.profile.toLowerCase() === targetProfile.toLowerCase());
+        if (!matchedScenario) {
+          let maxScore = -1;
+          DB.scenarios.forEach(scen => {
+            let score = 0;
+            scen.keywords.toLowerCase().split(',').forEach(kw => { if (kw.trim() && promptText.includes(kw.trim())) score++; });
+            if (score > maxScore) { maxScore = score; matchedScenario = scen; }
+          });
+        }
+        currentScenario = matchedScenario || DB.scenarios[0];
 
         const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
         
         categories.forEach(cat => {
           let validProducts = DB.products.filter(p => p.category === cat);
           
-          if (cat === 'Sacco a Pelo' && geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-            validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
-          } else if (cat === 'Sacco a Pelo' && isCold) {
-            validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
-          }
-
-          if(validProducts.length === 0 && cat === 'Sacco a Pelo') {
-            validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
+          // Filtri termici avanzati per categorie
+          if (cat === 'Sacco a Pelo') {
+            if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
+              validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
+            } else if (isCold) {
+              validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
+            }
+            if(validProducts.length === 0) {
+              validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
+            }
+          } else if (cat === 'Materassino' && isCold) {
+            // Preferenza R-Value più alto per il freddo
+            validProducts.sort((a, b) => parseFloat(b.rValue || 0) - parseFloat(a.rValue || 0));
           }
 
           validProducts.sort((a, b) => {
@@ -363,7 +367,6 @@
       } catch (err) {
         console.error("Errore durante l'elaborazione del prompt:", err);
       } finally {
-        // Garantisce che il pulsante si sblocchi sempre in qualsiasi circostanza
         btn.disabled = false;
         btnText.innerText = "⚡ Genera Kit";
       }
@@ -433,8 +436,18 @@
       `}).join('');
     }
 
-    document.getElementById("user-prompt")?.addEventListener("keypress", (e) => {
+    const promptInput = document.getElementById("user-prompt");
+    promptInput?.addEventListener("keypress", (e) => {
       if (e.key === "Enter") processPrompt();
+    });
+    
+    // Sblocca sempre il pulsante quando si digita qualcosa di nuovo
+    promptInput?.addEventListener("input", () => {
+      const btn = document.getElementById("btn-generate");
+      if(DB.scenarios.length > 0) {
+        btn.disabled = false;
+        btn.classList.remove("opacity-50", "cursor-not-allowed");
+      }
     });
 
     initDatabase();
