@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GearMatch — Smart Outdoor Kit Finder</title>
+  <title>GearMatch — Smart Multi-Activity Kit Finder</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style> body { font-family: 'Inter', sans-serif; } </style>
@@ -14,8 +14,8 @@
   <header class="border-b border-slate-200/80 bg-white/80 sticky top-0 z-50 backdrop-blur-md">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">🌲</div>
-        <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch <span class="text-[10px] font-bold text-white bg-slate-800 px-1.5 py-0.5 rounded ml-1 uppercase">Prototipo</span></span>
+        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">⚡</div>
+        <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch <span class="text-[10px] font-bold text-white bg-slate-800 px-1.5 py-0.5 rounded ml-1 uppercase">Multi-Sport</span></span>
       </div>
       <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 transition-colors">
         Connessione a GSheets...
@@ -28,10 +28,10 @@
     
     <section class="w-full text-center space-y-6 my-auto max-w-2xl">
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
+        Il tuo kit ideale per trekking, running o bici.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Scrivi liberamente o usa i filtri guidati. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
+        Scrivi cosa farai (es. "corsa in montagna", "bici gravel", "trekking in giornata senza tenda") e il sistema genererà il kit perfetto escludendo ciò che non serve.
       </p>
 
       <div class="pt-2 w-full">
@@ -42,7 +42,7 @@
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Trekking estivo leggero sotto i 300 euro..." 
+              placeholder="Es: Trail running in montagna sotto i 200 euro..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
             />
           </div>
@@ -66,28 +66,19 @@
         <div id="filters-panel" class="hidden mt-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm text-left transition-all">
           <div class="space-y-4">
             <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Clima / Ambiente</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Attività / Sport</p>
               <div class="flex flex-wrap gap-2">
-                <button onclick="toggleChip(this, 'estate')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Estivo</button>
-                <button onclick="toggleChip(this, 'freddo')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Freddo / Inverno</button>
-                <button onclick="toggleChip(this, 'deserto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Deserto</button>
+                <button onclick="toggleChip(this, 'trekking')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Trekking</button>
+                <button onclick="toggleChip(this, 'running')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Running / Trail</button>
+                <button onclick="toggleChip(this, 'bici')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Bici / Gravel</button>
               </div>
             </div>
             <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stile / Priorità</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Modalità</p>
               <div class="flex flex-wrap gap-2">
-                <button onclick="toggleChip(this, 'ultralight')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Ultralight</button>
+                <button onclick="toggleChip(this, 'senza tenda')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">In giornata (Senza tenda)</button>
                 <button onclick="toggleChip(this, 'economico')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Economico</button>
-                <button onclick="toggleChip(this, 'comfort')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Comfort / Stanziale</button>
-              </div>
-            </div>
-            <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Esigenze Specifiche & Budget</p>
-              <div class="flex flex-wrap gap-2">
-                <button onclick="toggleChip(this, 'con il cane')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Con il cane</button>
-                <button onclick="toggleChip(this, 'moto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">In Moto</button>
-                <button onclick="toggleChip(this, 'sotto i 300 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 300€</button>
-                <button onclick="toggleChip(this, 'sotto i 600 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 600€</button>
+                <button onclick="toggleChip(this, 'ultralight')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Ultralight</button>
               </div>
             </div>
           </div>
@@ -99,7 +90,7 @@
     <section id="results-section" class="w-full space-y-6 mt-12 hidden transition-all duration-500">
       <div class="border-t border-slate-200 pt-8"></div>
       
-      <!-- BUDGET WARNING BANNER (DINAMICO) -->
+      <!-- BUDGET WARNING BANNER -->
       <div id="budget-warning" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-800 text-sm flex items-center gap-3">
         <span class="text-xl">⚠️</span>
         <div id="budget-warning-text"></div>
@@ -186,7 +177,6 @@
       }
     }
 
-    // GESTIONE FILTRI MANUALI
     window.toggleFiltersPanel = function() {
       document.getElementById('filters-panel').classList.toggle('hidden');
     }
@@ -209,7 +199,7 @@
       if (activeFilters.size === 0) {
         promptInput.value = "";
       } else {
-        promptInput.value = "Kit per: " + Array.from(activeFilters).join(", ");
+        promptInput.value = Array.from(activeFilters).join(" ");
       }
     }
 
@@ -217,19 +207,21 @@
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
       if (!promptText.trim() || DB.scenarios.length === 0) return;
 
-      // Estrazione intelligente del budget dal testo (es. "sotto i 300 euro", "300€")
       const budgetMatch = promptText.match(/(?:sotto i|budget|massimo|entro i|fino a|max)?\s*€?\s*(\d{2,4})\b/i);
       detectedBudget = budgetMatch ? parseInt(budgetMatch[1]) : null;
 
-      // Determinazione profilo basata su parole chiave o budget basso
-      let targetProfile = "Bilanciato";
-      const isBudget = detectedBudget !== null && detectedBudget < 400 || ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
-      const isUltralight = ["ultralight", "leggero", "grammi", "corsa"].some(w => promptText.includes(w));
-      const isCold = ["freddo", "inverno", "neve", "sotto zero", "dicembre"].some(w => promptText.includes(w));
+      // Riconoscimento Attività e Modalità
+      const isRunning = ["running", "corsa", "trail", "maratona"].some(w => promptText.includes(w));
+      const isBici = ["bici", "bicicletta", "gravel", "ciclismo", "strada", "mtb"].some(w => promptText.includes(w));
+      const isDayTrip = ["giornata", "senza tenda", "in giornata", "senza pernottamento", "diurno"].some(w => promptText.includes(w)) || isRunning || isBici;
 
-      if (isCold) targetProfile = "4-Stagioni";
-      else if (isUltralight) targetProfile = "Ultralight";
-      else if (isBudget) targetProfile = "Budget";
+      let targetProfile = "Bilanciato";
+      if (isRunning) targetProfile = "Running";
+      else if (isBici) targetProfile = "Bici";
+      else if (isDayTrip) targetProfile = "DayTrip";
+      else if (["freddo", "inverno", "neve"].some(w => promptText.includes(w))) targetProfile = "4-Stagioni";
+      else if (["ultralight", "leggero"].some(w => promptText.includes(w))) targetProfile = "Ultralight";
+      else if (["poco", "economico", "budget"].some(w => promptText.includes(w)) || (detectedBudget !== null && detectedBudget < 300)) targetProfile = "Budget";
 
       // Match scenario
       let matchedScenario = DB.scenarios.find(scen => scen.profile.toLowerCase() === targetProfile.toLowerCase());
@@ -243,24 +235,38 @@
       }
       currentScenario = matchedScenario || DB.scenarios[0];
 
-      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
+      // Definizione categorie dinamiche in base all'attività (evita la tenda se non serve)
+      let categories = [];
+      if (isRunning) {
+        categories = ['Scarpe', 'Zaino Idrico', 'Abbigliamento'];
+      } else if (isBici) {
+        categories = ['Casco', 'Borse Bici', 'Kit Bici'];
+      } else if (isDayTrip) {
+        categories = ['Zaino', 'Giacca', 'Bastoncini'];
+      } else {
+        categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
+      }
       
       categories.forEach(cat => {
-        let validProducts = DB.products.filter(p => p.category === cat);
+        let validProducts = DB.products.filter(p => p.category.toLowerCase() === cat.toLowerCase());
         
-        // Se è richiesto un budget rigoroso o profilo budget, ordiniamo dal prezzo più basso
         if (targetProfile === "Budget" || detectedBudget !== null) {
           validProducts.sort((a, b) => a.price - b.price);
         } else {
           validProducts.sort((a, b) => {
-            if (a.profile === targetProfile && b.profile !== targetProfile) return -1;
-            if (b.profile === targetProfile && a.profile !== targetProfile) return 1;
+            if (a.profile.toLowerCase() === targetProfile.toLowerCase() && b.profile.toLowerCase() !== targetProfile.toLowerCase()) return -1;
+            if (b.profile.toLowerCase() === targetProfile.toLowerCase() && a.profile.toLowerCase() !== targetProfile.toLowerCase()) return 1;
             return a.price - b.price;
           });
         }
 
         availableOptions[cat] = validProducts.slice(0, 5); 
         currentKit[cat] = validProducts[0] || null;
+      });
+
+      // Pulisci categorie non più pertinenti se cambiamo sport
+      Object.keys(currentKit).forEach(cat => {
+        if (!categories.includes(cat)) delete currentKit[cat];
       });
 
       renderKit();
@@ -284,11 +290,10 @@
       document.getElementById("stat-weight").innerText = `${(totalWeight / 1000).toFixed(2)} kg`;
       document.getElementById("stat-price").innerText = `${totalPrice} €`;
 
-      // Controllo superamento budget e avviso dinamico
       const warningBox = document.getElementById("budget-warning");
       const warningText = document.getElementById("budget-warning-text");
       if (detectedBudget !== null && totalPrice > detectedBudget) {
-        warningText.innerHTML = `Con il budget di <strong>${detectedBudget}€</strong> non è possibile coprire tutte le 5 categorie tecniche con i prodotti a listino. Ti abbiamo selezionato la configurazione più economica possibile a <strong>${totalPrice}€</strong>.`;
+        warningText.innerHTML = `Con il budget di <strong>${detectedBudget}€</strong> non è possibile coprire tutte le categorie con i prodotti attuali. Ti abbiamo selezionato la configurazione più economica possibile a <strong>${totalPrice}€</strong>.`;
         warningBox.classList.remove("hidden");
         warningBox.classList.add("flex");
       } else {
