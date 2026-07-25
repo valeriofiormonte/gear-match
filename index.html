@@ -17,8 +17,8 @@
         <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">🌲</div>
         <span class="text-lg font-bold tracking-tight text-slate-900">GearMatch</span>
       </div>
-      <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700">
-        Inizializzazione Database...
+      <span id="data-status" class="text-xs font-medium px-3 py-1 rounded-full border border-slate-200 bg-slate-100 text-slate-700">
+        Database: Pronto
       </span>
     </div>
   </header>
@@ -29,10 +29,10 @@
     <!-- PROMPT HERO SECTION -->
     <section class="w-full text-center space-y-6 my-auto max-w-2xl">
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
+        Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> cucito sui tuoi vincoli.
       </h1>
       <p class="text-sm sm:text-base text-slate-600">
-        Database esterno sincronizzato. Descrivi il tuo viaggio e l'algoritmo abbinerà i prodotti migliori.
+        Scrivi liberamente: l'algoritmo calcolerà il kit rispettando budget, clima e stile di viaggio.
       </p>
 
       <div class="pt-2">
@@ -42,24 +42,23 @@
             <input 
               type="text" 
               id="user-prompt" 
-              placeholder="Es: Voglio fare campeggio con la famiglia in comodità..." 
+              placeholder="Es: Trekking invernale freddo con budget sotto i 400 euro..." 
               class="w-full bg-transparent text-slate-900 text-sm focus:outline-none placeholder:text-slate-400 font-medium"
-              disabled
             />
           </div>
           <button 
             id="btn-generate"
             onclick="processPrompt()" 
-            class="bg-slate-300 text-slate-500 font-semibold text-sm px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-            disabled>
-            ⏳ Caricamento...
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
+            ⚡ Genera Kit
           </button>
         </div>
 
+        <!-- SUGGERIMENTI RAPIDI -->
         <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs">
-          <button onclick="setPrompt('Un trekking ultraleggero per macinare dislivello sulle Alpi')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🪶 Ultralight Alta Quota</button>
-          <button onclick="setPrompt('Spedizione in Perù con freddo intenso')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">❄️ Spedizione Andina</button>
-          <button onclick="setPrompt('Weekend in bikepacking gravel con poco spazio')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🚲 Bikepacking Gravel</button>
+          <button onclick="setPrompt('Trekking invernale sotto zero con budget massimo 400 euro')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">❄️ Inverno &lt; 400€</button>
+          <button onclick="setPrompt('Voglio spendere poco, massimo 250 euro per iniziare')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">💰 Budget Super Economy</button>
+          <button onclick="setPrompt('Trekking ultraleggero 3 giorni sulle Alpi')" class="bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">🪶 Ultralight Alpi</button>
         </div>
       </div>
     </section>
@@ -89,7 +88,7 @@
 
       <!-- PRODOTTI -->
       <div>
-        <h3 class="text-sm font-semibold text-slate-900 mb-3">📦 Equipaggiamento Consigliato</h3>
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">📦 Equipaggiamento Consigliato (Ottimizzato)</h3>
         <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
@@ -97,124 +96,166 @@
   </main>
 
   <script>
-    // =========================================================================
-    // INSERISCI QUI I DUE LINK CSV (Scheda Scenari e Scheda Prodotti)
-    // =========================================================================
-    const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
-    const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
+    // Se vuoi collegarlo a Google Fogli, inserisci qui i link CSV pubblicati.
+    // Se lasci vuoti, userà il database locale integrato ricco di opzioni.
+const URL_CSV_SCENARI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=2066125776&single=true&output=csv";
+const URL_CSV_PRODOTTI = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRiMb_FgyOWuSPRFOXFtq-6n51qa4G8UcD6HGnM3_Xa_FkPeRnhSaaiHgl4b3AgpvEXBNYIrdUSRpz_/pub?gid=0&single=true&output=csv";
 
-    let DB = { scenarios: [], products: [] };
+    // DATABASE LOCALE AMPLIATO (Fallback & Default)
+    let DB = {
+      scenarios: [
+        { id: "SCEN-001", name: "Primo Bivacco Estivo", desc: "Escursione estiva senza impegnare cifre elevate.", profile: "Budget", keywords: "primo, principiante, economico, budget, estate, mare, facile, poco, spendere" },
+        { id: "SCEN-002", name: "Trekking 3+ Giorni Ultralight", desc: "Attrezzatura tecnica e leggera per massimi dislivelli.", profile: "Ultralight", keywords: "ultralight, leggero, 3 giorni, dislivello, alpi, dolomiti, tecnico, fatica, grammi" },
+        { id: "SCEN-003", name: "Fast & Light Weekend", desc: "Equilibrio perfetto tra comfort e peso per 2 giorni.", profile: "Bilanciato", keywords: "weekend, 2 giorni, veloce, bilanciato, appennini, duchessa, lago, rapido" },
+        { id: "SCEN-004", name: "Spedizione Invernale / Freddo", desc: "Isolamento termico estremo per basse temperature e neve.", profile: "4-Stagioni", keywords: "freddo, inverno, neve, sotto zero, ghiaccio, termico, perù, alta quota, ghiacciaio, 4-stagioni" },
+        { id: "SCEN-005", name: "Campeggio Stanziale Comfort", desc: "Massimo comfort con arrivo in auto, peso non vincolante.", profile: "Comfort", keywords: "famiglia, stanziale, campeggio, comfort, comodo, macchina, bambini, relax" }
+      ],
+      products: [
+        // Tende
+        { id: "P01", name: "Cloud Up 2 Upgrade", brand: "Naturehike", category: "Tenda", price: 130, weight: 1400, profile: "Budget", url: "https://amazon.it" },
+        { id: "P02", name: "MT900 2 Posti", brand: "Forclaz", category: "Tenda", price: 220, weight: 1950, profile: "Bilanciato", url: "https://decathlon.it" },
+        { id: "P03", name: "Copper Spur HV UL2", brand: "Big Agnes", category: "Tenda", price: 490, weight: 1200, profile: "Ultralight", url: "https://bergfreunde.it" },
+        { id: "P04", name: "Svalbard 3", brand: "Ferrino", category: "Tenda", price: 450, weight: 4100, profile: "4-Stagioni", url: "https://ferrino.it" },
+        { id: "P05", name: "MH100 2 Posti", brand: "Decathlon", category: "Tenda", price: 45, weight: 2400, profile: "Comfort", url: "https://decathlon.it" },
 
-    // =========================================================================
-    // 1. FETCH DATI DA GOOGLE FOGLI
-    // =========================================================================
+        // Sacchi a Pelo
+        { id: "P06", name: "MT500 Synth 8°C", brand: "Forclaz", category: "Sacco a Pelo", price: 55, weight: 980, tempComfort: 8, profile: "Budget", url: "https://decathlon.it" },
+        { id: "P07", name: "Arpenaz 20°C", brand: "Decathlon", category: "Sacco a Pelo", price: 20, weight: 1100, tempComfort: 20, profile: "Comfort", url: "https://decathlon.it" },
+        { id: "P08", name: "Lite Line 300", brand: "Cumulus", category: "Sacco a Pelo", price: 270, weight: 600, tempComfort: 4, profile: "Ultralight", url: "https://cumulus.equipment" },
+        { id: "P09", name: "Spark SpII", brand: "Sea to Summit", category: "Sacco a Pelo", price: 380, weight: 490, tempComfort: -2, profile: "Bilanciato", url: "https://bergfreunde.it" },
+        { id: "P10", name: "Panyam 450 (-6°C)", brand: "Cumulus", category: "Sacco a Pelo", price: 360, weight: 830, tempComfort: -6, profile: "4-Stagioni", url: "https://cumulus.equipment" },
+
+        // Materassini
+        { id: "P11", name: "Trek 100 Schiuma", brand: "Forclaz", category: "Materassino", price: 18, weight: 370, rValue: 1.5, profile: "Budget", url: "https://decathlon.it" },
+        { id: "P12", name: "Insulated Static V", brand: "Klymit", category: "Materassino", price: 85, weight: 700, rValue: 4.4, profile: "Bilanciato", url: "https://amazon.it" },
+        { id: "P13", name: "NeoAir XLite NXT", brand: "Therm-a-Rest", category: "Materassino", price: 220, weight: 370, rValue: 4.5, profile: "Ultralight", url: "https://bergfreunde.it" },
+        { id: "P14", name: "NeoAir XTherm NXT", brand: "Therm-a-Rest", category: "Materassino", price: 260, weight: 430, rValue: 7.3, profile: "4-Stagioni", url: "https://bergfreunde.it" },
+        { id: "P15", name: "MegaMat 10", brand: "Exped", category: "Materassino", price: 200, weight: 2070, rValue: 8.1, profile: "Comfort", url: "https://bergfreunde.it" },
+
+        // Zaini
+        { id: "P16", name: "MT500 Air 50L", brand: "Forclaz", category: "Zaino", price: 110, weight: 1700, profile: "Budget", url: "https://decathlon.it" },
+        { id: "P17", name: "Exos 48", brand: "Osprey", category: "Zaino", price: 210, weight: 1250, profile: "Bilanciato", url: "https://bergfreunde.it" },
+        { id: "P18", name: "Crown3 60", brand: "Granite Gear", category: "Zaino", price: 240, weight: 1080, profile: "Ultralight", url: "https://bergfreunde.it" },
+        { id: "P19", name: "Mutant 38", brand: "Osprey", category: "Zaino", price: 180, weight: 1200, profile: "4-Stagioni", url: "https://amazon.it" },
+        { id: "P20", name: "Aircontact Core 60", brand: "Deuter", category: "Zaino", price: 220, weight: 2310, profile: "Comfort", url: "https://bergfreunde.it" },
+
+        // Fornelletti
+        { id: "P21", name: "BRS-3000T", brand: "BRS", category: "Fornelletto", price: 19, weight: 25, profile: "Budget", url: "https://amazon.it" },
+        { id: "P22", name: "PocketRocket 2", brand: "MSR", category: "Fornelletto", price: 45, weight: 73, profile: "Bilanciato", url: "https://amazon.it" },
+        { id: "P23", name: "WindMaster", brand: "SOTO", category: "Fornelletto", price: 80, weight: 87, profile: "Ultralight", url: "https://bergfreunde.it" },
+        { id: "P24", name: "Reactor 1.0L", brand: "MSR", category: "Fornelletto", price: 220, weight: 417, profile: "4-Stagioni", url: "https://amazon.it" },
+        { id: "P25", name: "Trangia 27-1 UL", brand: "Trangia", category: "Fornelletto", price: 70, weight: 690, profile: "Comfort", url: "https://amazon.it" }
+      ]
+    };
+
+    // Inizializzazione dati da GSheets se configurati
     async function initDatabase() {
-      if (URL_CSV_SCENARI.includes("LINK_CSV")) {
-        updateStatus("Inserisci i link CSV nel codice per iniziare", "red");
-        return;
-      }
-
+      if (!URL_CSV_SCENARI || URL_CSV_SCENARI.includes("LINK")) return;
       try {
-        // Scarica entrambi i file in parallelo
-        const [resScenari, resProdotti] = await Promise.all([
-          fetch(URL_CSV_SCENARI), fetch(URL_CSV_PRODOTTI)
-        ]);
+        const [resScen, resProd] = await Promise.all([fetch(URL_CSV_SCENARI), fetch(URL_CSV_PRODOTTI)]);
+        const txtScen = await resScen.text();
+        const txtProd = await resProd.text();
 
-        const txtScenari = await resScenari.text();
-        const txtProdotti = await resProdotti.text();
-
-        // Parsing Scenari
-        DB.scenarios = txtScenari.split(/\r?\n/).slice(1).map(line => {
-          const v = line.split(',').map(s => s.trim());
+        DB.scenarios = txtScen.split(/\r?\n/).slice(1).map(l => {
+          const v = l.split(',').map(s => s.trim());
           return v.length > 3 ? { id: v[0], name: v[1], desc: v[2], profile: v[3], keywords: v[4] || "" } : null;
         }).filter(Boolean);
 
-        // Parsing Prodotti
-        DB.products = txtProdotti.split(/\r?\n/).slice(1).map(line => {
-          const v = line.split(',').map(s => s.trim());
+        DB.products = txtProd.split(/\r?\n/).slice(1).map(l => {
+          const v = l.split(',').map(s => s.trim());
           return v.length > 5 ? {
             id: v[0], name: v[1], brand: v[2], category: v[3],
             price: parseFloat(v[4])||0, weight: parseInt(v[5])||0,
-            tempComfort: v[6] && v[6]!=='-' ? v[6] : undefined,
-            rValue: v[7] && v[7]!=='-' ? v[7] : undefined,
-            profile: v[8], url: v[9] || "#"
+            tempComfort: v[6]!=='-'?v[6]:undefined, rValue: v[7]!=='-'?v[7]:undefined,
+            profile: v[8], url: v[9]||"#"
           } : null;
         }).filter(Boolean);
 
-        updateStatus("Database Live (Connesso a GSheets)", "emerald");
-        
-        // Abilita la barra di ricerca
-        document.getElementById("user-prompt").disabled = false;
-        const btn = document.getElementById("btn-generate");
-        btn.disabled = false;
-        btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2";
-        btn.innerHTML = "⚡ Genera Kit";
-
-      } catch (error) {
-        updateStatus("Errore connessione a Google Fogli", "red");
-        console.error(error);
+        document.getElementById("data-status").innerText = "Database: Google Fogli (Live)";
+        document.getElementById("data-status").className = "text-xs font-medium px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700";
+      } catch (e) {
+        console.warn("Usando database locale di fallback");
       }
     }
 
-    function updateStatus(msg, color) {
-      const el = document.getElementById("data-status");
-      el.innerText = msg;
-      el.className = `text-xs font-medium px-3 py-1 rounded-full border border-${color}-200 bg-${color}-50 text-${color}-700`;
-    }
-
-    // =========================================================================
-    // 2. MOTORE DI RICERCA CONVERSAZIONALE NLP
-    // =========================================================================
     function setPrompt(text) {
       document.getElementById("user-prompt").value = text;
       processPrompt();
     }
 
+    // =========================================================================
+    // MOTORE DI SELEZIONE INTELLIGENTE (CON BUDGET E CLIMA)
+    // =========================================================================
     function processPrompt() {
       const promptText = document.getElementById("user-prompt").value.toLowerCase();
       if (!promptText.trim()) return;
 
-      let bestMatch = DB.scenarios[0];
-      let maxScore = 0;
+      // 1. Estrazione Budget numerico se presente (es. "sotto i 400 euro" -> 400)
+      const budgetRegex = /(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i;
+      const budgetMatch = promptText.match(budgetRegex);
+      const maxBudget = budgetMatch ? parseInt(budgetMatch[1]) : null;
 
-      // Confronta le parole scritte dall'utente con le keywords nel foglio Google
+      // 2. Riconoscimento Clima / Condizioni
+      const isCold = promptText.includes("freddo") || promptText.includes("inverno") || promptText.includes("neve") || promptText.includes("sotto zero");
+      const isUltralight = promptText.includes("ultralight") || promptText.includes("leggero") || promptText.includes("grammi");
+      const isBudget = promptText.includes("poco") || promptText.includes("economico") || promptText.includes("budget") || promptText.includes("spendere");
+
+      // Profilo di base
+      let targetProfile = "Bilanciato";
+      if (isCold) targetProfile = "4-Stagioni";
+      else if (isUltralight) targetProfile = "Ultralight";
+      else if (isBudget || (maxBudget && maxBudget < 300)) targetProfile = "Budget";
+
+      // Trova lo scenario migliore dal DB
+      let bestScenario = DB.scenarios.find(s => s.profile === targetProfile) || DB.scenarios[0];
+      let maxScore = 0;
       DB.scenarios.forEach(scen => {
         let score = 0;
-        const keywords = scen.keywords.toLowerCase().split(',').map(k => k.trim());
-        
-        keywords.forEach(kw => {
-          if (kw && promptText.includes(kw)) score++;
+        scen.keywords.toLowerCase().split(',').forEach(kw => {
+          if (kw.trim() && promptText.includes(kw.trim())) score++;
         });
-
         if (score > maxScore) {
           maxScore = score;
-          bestMatch = scen;
+          bestScenario = scen;
         }
       });
 
-      renderKit(bestMatch);
+      // 3. SELEZIONE PRODOTTI CATEGORIA PER CATEGORIA
+      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
+      let kitProducts = [];
+
+      categories.forEach(cat => {
+        const catProducts = DB.products.filter(p => p.category === cat);
+        
+        // Cerca prima il prodotto ideale per il profilo target
+        let chosen = catProducts.find(p => p.profile === bestScenario.profile);
+        
+        // Se c'è un budget massimo stretto e il totale rischia di sforare, filtriamo i prodotti più economici
+        if (maxBudget) {
+          const sortedByPrice = [...catProducts].sort((a, b) => a.price - b.price);
+          // Seleziona il più economico che soddisfa il clima (se richiesto freddo, prendiamo prodotti adatti)
+          if (isCold && cat === 'Sacco a Pelo') {
+            chosen = sortedByPrice.find(p => p.tempComfort && parseFloat(p.tempComfort) <= 0) || sortedByPrice[0];
+          } else {
+            chosen = sortedByPrice[0]; // Prende l'opzione più economica per rientrare nel budget
+          }
+        } else if (!chosen) {
+          chosen = catProducts[0];
+        }
+
+        if (chosen) kitProducts.push(chosen);
+      });
+
+      renderKit(bestScenario, kitProducts);
     }
 
-    // =========================================================================
-    // 3. RENDERIZZAZIONE A SCHERMO
-    // =========================================================================
-    function renderKit(scenario) {
+    function renderKit(scenario, kit) {
       document.getElementById("results-section").classList.remove("hidden");
       document.getElementById("results-section").scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       document.getElementById("scenario-title").innerText = scenario.name;
       document.getElementById("scenario-desc").innerText = scenario.desc;
       document.getElementById("scenario-tag").innerText = `Profilo: ${scenario.profile}`;
-
-      const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
-      
-      const kit = categories.map(cat => {
-        const matchingCat = DB.products.filter(p => p.category === cat);
-        // Cerca il prodotto col profilo esatto, altrimenti usa un fallback Bilanciato o il primo disponibile
-        return matchingCat.find(p => p.profile === scenario.profile) || 
-               matchingCat.find(p => p.profile === 'Bilanciato') || 
-               matchingCat[0];
-      }).filter(Boolean);
 
       const totalWeight = kit.reduce((acc, p) => acc + p.weight, 0);
       const totalPrice = kit.reduce((acc, p) => acc + p.price, 0);
@@ -248,8 +289,8 @@
       `).join('');
     }
 
-    document.getElementById("user-prompt").addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.target.disabled) processPrompt();
+    document.getElementById("user-prompt")?.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") processPrompt();
     });
 
     initDatabase();
