@@ -30,8 +30,9 @@
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
         Il tuo kit da trekking ideale,<br class="hidden sm:inline"/> trovato dalle tue parole.
       </h1>
+      <!-- Sottotitolo fisso e generico come richiesto -->
       <p class="text-sm sm:text-base text-slate-600">
-        Prova a scrivere: <strong class="text-slate-800">"Trekking sul Terminillo ad agosto"</strong>. Il sistema calcolerà l'altitudine e la temperatura notturna per scegliere il sacco a pelo giusto.
+        Scrivi liberamente o usa i filtri guidati. Il sistema selezionerà i prodotti migliori e ti lascerà esplorare le alternative per bilanciare peso e budget.
       </p>
 
       <div class="pt-2 w-full">
@@ -53,6 +54,45 @@
             <span id="btn-text">⚡ Genera Kit</span>
           </button>
         </div>
+
+        <!-- TOGGLE FILTRI MANUALI (Ripristinati) -->
+        <div class="mt-4 text-center">
+          <button onclick="toggleFiltersPanel()" class="text-xs text-slate-500 hover:text-emerald-600 font-medium inline-flex items-center gap-1.5 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            Filtri Guidati
+          </button>
+        </div>
+
+        <!-- PANNELLO FILTRI MANUALI -->
+        <div id="filters-panel" class="hidden mt-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm text-left transition-all">
+          <div class="space-y-4">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Clima / Ambiente</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'estate')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Estivo</button>
+                <button onclick="toggleChip(this, 'freddo')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Freddo / Inverno</button>
+                <button onclick="toggleChip(this, 'deserto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Deserto</button>
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stile / Priorità</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'ultralight')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Ultralight</button>
+                <button onclick="toggleChip(this, 'economico')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Economico</button>
+                <button onclick="toggleChip(this, 'comfort')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Comfort / Stanziale</button>
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Esigenze Specifiche & Budget</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="toggleChip(this, 'con il cane')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Con il cane</button>
+                <button onclick="toggleChip(this, 'moto')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">In Moto</button>
+                <button onclick="toggleChip(this, 'sotto i 300 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 300€</button>
+                <button onclick="toggleChip(this, 'sotto i 600 euro')" class="filter-chip px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors">Budget max 600€</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -60,19 +100,19 @@
     <section id="results-section" class="w-full space-y-6 mt-12 hidden transition-all duration-500">
       <div class="border-t border-slate-200 pt-8"></div>
       
-      <!-- GEO WEATHER WIDGET (Appare solo se riconosce il luogo) -->
+      <!-- GEO WEATHER WIDGET -->
       <div id="weather-widget" class="hidden bg-gradient-to-r from-blue-900 to-slate-800 rounded-2xl p-6 text-white shadow-lg flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <div class="text-4xl" id="weather-icon">🌤️</div>
           <div>
             <h4 class="text-xs font-bold text-blue-300 uppercase tracking-wider mb-1">Motore Geo-Termico Attivato</h4>
-            <p class="text-lg font-semibold leading-tight" id="weather-location-text">Destinazione rilevata: Terminillo</p>
-            <p class="text-sm text-slate-300 mt-1" id="weather-details-text">Altitudine: 1900m | Periodo: Agosto</p>
+            <p class="text-lg font-semibold leading-tight" id="weather-location-text">Destinazione rilevata</p>
+            <p class="text-sm text-slate-300 mt-1" id="weather-details-text">Altitudine e Periodo</p>
           </div>
         </div>
         <div class="bg-white/10 border border-white/20 rounded-xl p-3 text-center min-w-[140px] backdrop-blur-sm">
           <span class="block text-[10px] uppercase font-bold text-blue-200 tracking-wider">T. Notturna Stimata</span>
-          <span class="text-2xl font-extrabold" id="weather-temp-text">8°C</span>
+          <span class="text-2xl font-extrabold" id="weather-temp-text">0°C</span>
         </div>
       </div>
 
@@ -115,10 +155,9 @@
     let currentScenario = null;
     let availableOptions = {}; 
     let currentKit = {};       
+    let activeFilters = new Set();
     
-    // Array dei mesi per l'estrazione NLP
     const NOMI_MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-    // Temperature medie massime al livello del mare in Italia (approssimative per il calcolo del gradiente)
     const TEMP_BASE_MARE = [12, 13, 15, 19, 24, 28, 31, 31, 27, 22, 16, 13];
 
     function parseCSVLine(text) {
@@ -160,46 +199,74 @@
       }
     }
 
+    // GESTIONE FILTRI MANUALI
+    window.toggleFiltersPanel = function() {
+      document.getElementById('filters-panel').classList.toggle('hidden');
+    }
+
+    window.toggleChip = function(btnElement, keyword) {
+      if(activeFilters.has(keyword)) {
+        activeFilters.delete(keyword);
+        btnElement.classList.remove('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
+        btnElement.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
+      } else {
+        activeFilters.add(keyword);
+        btnElement.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
+        btnElement.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-300', 'ring-2', 'ring-emerald-500/20');
+      }
+      updatePromptInput();
+    }
+
+    function updatePromptInput() {
+      const promptInput = document.getElementById("user-prompt");
+      if (activeFilters.size === 0) {
+        promptInput.value = "";
+      } else {
+        promptInput.value = "Kit per: " + Array.from(activeFilters).join(", ");
+      }
+    }
+
     // ==========================================
-    // MOTORE NLP + GEO METEO
+    // MOTORE ROBUSTO GEO-METEO (Stop-Word Extraction)
     // ==========================================
     async function analyzeGeographyAndWeather(promptText) {
       let result = { hasGeo: false, locationName: "", elevation: 0, monthName: "", estimatedMinTemp: null };
       
-      // 1. Trova il mese (se non c'è, usa il mese corrente)
+      // 1. Trova il mese
       let meseIndex = NOMI_MESI.findIndex(m => promptText.includes(m));
       if (meseIndex === -1) meseIndex = new Date().getMonth();
       result.monthName = NOMI_MESI[meseIndex];
 
-      // 2. Cerca parole che indicano un luogo (es. "sul Terminillo", "al Gran Sasso", "in Dolomiti")
-      const regexLuogo = /(?:sul|sulla|sulle|al|alla|alle|in|a|verso)\s+([a-zA-Zèéàòùì']+)/i;
-      const match = promptText.match(regexLuogo);
+      // 2. Estrazione intelligente del luogo ripulendo stop-words e mesi
+      const stopWords = ['gita', 'trekking', 'escursione', 'campeggio', 'weekend', 'viaggio', 'spedizione', 'dal', 'al', 'del', 'nel', 'in', 'su', 'sul', 'sulla', 'sulle', 'a', 'ad', 'per', 'con', 'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'circa'];
+      
+      let words = promptText
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+        .split(/\s+/)
+        .filter(w => w.length > 1 && !stopWords.includes(w) && !NOMI_MESI.includes(w) && isNaN(w));
 
-      if (match) {
-        let luogoTrovato = match[1];
-        
-        // Chiamata all'API Geocoding gratuita (Open-Meteo)
+      if (words.length > 0) {
+        // Prende le ultime parole rimaste (es. "terminillo" o "gran sasso")
+        let locationQuery = words.slice(-2).join(" "); 
+
         try {
-          const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${luogoTrovato}&count=1&language=it`);
+          const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=it`);
           const geoData = await res.json();
           
           if (geoData.results && geoData.results.length > 0) {
             const loc = geoData.results[0];
             result.hasGeo = true;
             result.locationName = loc.name;
-            result.elevation = loc.elevation || 0; // Altitudine in metri
+            result.elevation = loc.elevation || 0;
             
-            // 3. Calcolo Termico (Gradiente Verticale -0.65°C ogni 100m)
             const maxTempMare = TEMP_BASE_MARE[meseIndex];
             const maxTempQuota = maxTempMare - (result.elevation / 100 * 0.65);
-            // Stima temperatura minima notturna (-10 gradi dalla massima, tipico in montagna)
             result.estimatedMinTemp = Math.round(maxTempQuota - 10); 
           }
         } catch(e) { console.log("Geocoding failed", e); }
       }
       return result;
     }
-
 
     window.processPrompt = async function() {
       const btn = document.getElementById("btn-generate");
@@ -208,26 +275,21 @@
       
       if (!promptText.trim() || DB.scenarios.length === 0) return;
 
-      // Loading state
       btn.disabled = true;
       btnText.innerText = "🛰️ Analisi Geo-Meteo...";
 
-      // 1. Eseguiamo l'analisi Geografica e Climatica
       const geoInfo = await analyzeGeographyAndWeather(promptText);
 
-      // 2. Logica di base NLP
       const maxBudget = (promptText.match(/(?:sotto i|budget|massimo|entro i|fino a)?\s*€?\s*(\d{3,4})\b/i) || [])[1];
       const isUltralight = ["ultralight", "leggero", "grammi", "corsa"].some(w => promptText.includes(w));
       const isBudget = ["poco", "economico", "budget", "spendere"].some(w => promptText.includes(w));
       
       let targetProfile = "Bilanciato";
-
-      // L'intelligenza climatica sovrascrive le preferenze testuali
       let isCold = false;
+
       if (geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
          if (geoInfo.estimatedMinTemp <= 5) isCold = true;
       } else {
-         // Fallback sul testo se non c'è luogo rilevato
          isCold = ["freddo", "inverno", "neve", "sotto zero"].some(w => promptText.includes(w));
       }
 
@@ -235,7 +297,6 @@
       else if (isUltralight) targetProfile = "Ultralight";
       else if (isBudget || (maxBudget && parseInt(maxBudget) < 300)) targetProfile = "Budget";
 
-      // Seleziona lo scenario
       let maxScore = -1;
       DB.scenarios.forEach(scen => {
         let score = 0;
@@ -243,21 +304,17 @@
         if (score > maxScore) { maxScore = score; currentScenario = scen; }
       });
 
-      // Filtra i prodotti
       const categories = ['Tenda', 'Sacco a Pelo', 'Materassino', 'Zaino', 'Fornelletto'];
       
       categories.forEach(cat => {
         let validProducts = DB.products.filter(p => p.category === cat);
         
-        // LOGICA AVANZATA SACCO A PELO BASATA SUL METEO
         if (cat === 'Sacco a Pelo' && geoInfo.hasGeo && geoInfo.estimatedMinTemp !== null) {
-          // Filtra solo i sacchi a pelo che hanno una T Comfort inferiore o uguale alla temperatura stimata notturna
           validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= (geoInfo.estimatedMinTemp + 2)); 
         } else if (cat === 'Sacco a Pelo' && isCold) {
           validProducts = validProducts.filter(p => p.tempComfort !== undefined && p.tempComfort <= 2);
         }
 
-        // Se l'algoritmo Meteo è stato troppo severo e ha svuotato la lista, recuperiamo i più caldi disponibili
         if(validProducts.length === 0 && cat === 'Sacco a Pelo') {
           validProducts = DB.products.filter(p => p.category === cat).sort((a,b) => (a.tempComfort||100) - (b.tempComfort||100));
         }
@@ -272,14 +329,12 @@
         currentKit[cat] = validProducts[0] || null;
       });
 
-      // Gestione UI Widget Meteo
       const weatherWidget = document.getElementById("weather-widget");
       if (geoInfo.hasGeo) {
         document.getElementById("weather-location-text").innerText = `Destinazione: ${geoInfo.locationName}`;
         document.getElementById("weather-details-text").innerText = `Altitudine: ${Math.round(geoInfo.elevation)}m slm | Periodo: ${geoInfo.monthName.charAt(0).toUpperCase() + geoInfo.monthName.slice(1)}`;
         document.getElementById("weather-temp-text").innerText = `${geoInfo.estimatedMinTemp}°C`;
         
-        // Cambia icona base alla temperatura
         let icon = "🌤️";
         if(geoInfo.estimatedMinTemp <= 0) icon = "❄️";
         else if (geoInfo.estimatedMinTemp < 10) icon = "🥶";
@@ -293,9 +348,9 @@
         weatherWidget.classList.remove("flex");
       }
 
+      document.getElementById('filters-panel').classList.add('hidden');
       renderKit();
 
-      // Ripristina bottone
       btn.disabled = false;
       btnText.innerText = "⚡ Genera Kit";
     }
